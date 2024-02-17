@@ -1,0 +1,4 @@
+name: Sectors
+version: '${version}'
+main: me.jm3l.sectors.Sectors
+api-version: 1.20
