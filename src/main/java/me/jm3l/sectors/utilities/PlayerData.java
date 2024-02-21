@@ -76,6 +76,7 @@ public class PlayerData {
         return null;
     }
     public Sector getSectorOrError(Player p) throws NotInSector {
+        p.sendMessage(String.valueOf(sPlayers));
         if(!sPlayers.containsKey(p)){
             p.sendMessage(ConfigManager.NOT_IN_SECTOR);
             throw new NotInSector();

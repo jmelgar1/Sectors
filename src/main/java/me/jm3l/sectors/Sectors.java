@@ -35,7 +35,7 @@ public final class Sectors extends JavaPlugin {
         this.claimWand = new ClaimWand(this);
         this.playerData = new PlayerData();
         getCommand("sectors").setExecutor(new SCommand(this));
-
+        getCommand("savesectors").setExecutor(new SaveSectorsCommand(this));
         saveDefaultConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
@@ -51,7 +51,7 @@ public final class Sectors extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        //sectorsFile.saveSectors();
+        sectorsFile.saveSectors();
         System.out.println("[OFF] Sector Disabled");
     }
 }

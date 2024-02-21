@@ -42,23 +42,27 @@ public class Claim implements ConfigurationSerializable {
         if (o == null || getClass() != o.getClass()) return false;
         Claim claim = (Claim) o;
         return x == claim.x &&
+                y == claim.y &&
                 z == claim.z &&
                 x2 == claim.x2 &&
+                y2 == claim.y2 &&
                 z2 == claim.z2;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, z, x2, z2);
+        return Objects.hash(x, y, z, x2, y2, z2);
     }
 
     public Claim(MemorySection map, Sectors plugin){
         this.x = (int) map.get("x");
+        this.y = (int) map.get("y");
         this.z = (int) map.get("z");
         this.x2 = (int) map.get("x2");
+        this.y2 = (int) map.get("y2");
         this.z2 = (int) map.get("z2");
         this.world = Bukkit.getWorld((String) map.get("world"));
-        this.bounds = new BoundingBox(this.x,world.getMinHeight(),this.z,this.x2,world.getMaxHeight(),this.z2);
+        this.bounds = new BoundingBox(this.x,this.y,this.z,this.x2,this.y2,this.z2);
         this.plugin = plugin;
     }
 
@@ -85,34 +89,66 @@ public class Claim implements ConfigurationSerializable {
         return false;
     }
 
-    public void showBounds(Player p){
-        double height = p.getWorld().getHighestBlockYAt(this.getBounds().getCenter().toLocation(p.getWorld())) + 25.0;
+    public void showBounds(Player p) {
         double minX = this.getBounds().getMinX();
         double maxX = this.getBounds().getMaxX();
+        double minY = this.getBounds().getMinY();
+        double maxY = this.getBounds().getMaxY();
         double minZ = this.getBounds().getMinZ();
         double maxZ = this.getBounds().getMaxZ();
-        for (double i = minX; i < maxX; i += 1d / 3d) {
-            for (double j = 62; j < height; j += 4.0) {
-                p.spawnParticle(Particle.DRIP_LAVA, i, j, minZ, 1);
-                p.spawnParticle(Particle.DRIPPING_OBSIDIAN_TEAR, i, j + 2.0, minZ, 1);
+
+        // Adjust the loop to handle 2x2 blocks for the checkered pattern
+        for (double x = minX; x <= maxX; x += 2) {
+            for (double z = minZ; z <= maxZ; z += 2) {
+                // Check for alternating pattern
+                boolean isFilledSection = (((int)x / 2) + ((int)z / 2)) % 2 == 0;
+                if (isFilledSection) {
+                    for (double offsetX = 0; offsetX < 2; ++offsetX) {
+                        for (double offsetZ = 0; offsetZ < 2; ++offsetZ) {
+                            double finalX = x + offsetX;
+                            double finalZ = z + offsetZ;
+                            // Ensure we don't go beyond the bounds
+                            if (finalX <= maxX && finalZ <= maxZ) {
+                                p.spawnParticle(Particle.DRIPPING_OBSIDIAN_TEAR, finalX, minY, finalZ, 2); // Floor
+                                p.spawnParticle(Particle.DRIPPING_OBSIDIAN_TEAR, finalX, maxY, finalZ, 2); // Ceiling
+                            }
+                        }
+                    }
+                }
             }
         }
-        for (double i = minX; i < maxX; i += 1d / 3d) {
-            for (double j = 62; j < height; j += 4.0) {
-                p.spawnParticle(Particle.DRIP_LAVA, i, j, maxZ, 1);
-                p.spawnParticle(Particle.DRIPPING_OBSIDIAN_TEAR, i, j + 2.0, maxZ, 1);
+
+        // Apply a similar pattern for the walls, ensuring we alternate sections vertically as well
+        for (double y = minY; y <= maxY; y += 2) {
+            for (double i = minX; i <= maxX; i += 2) { // Front and back walls
+                boolean isFilledSection = (((int)y / 2) + ((int)i / 2)) % 2 == 0;
+                if (isFilledSection) {
+                    for (double offsetY = 0; offsetY < 2; ++offsetY) {
+                        for (double offsetI = 0; offsetI < 2; ++offsetI) {
+                            double finalY = y + offsetY;
+                            double finalI = i + offsetI;
+                            if (finalY <= maxY && finalI <= maxX) {
+                                p.spawnParticle(Particle.DRIPPING_OBSIDIAN_TEAR, finalI, finalY, minZ, 2);
+                                p.spawnParticle(Particle.DRIPPING_OBSIDIAN_TEAR, finalI, finalY, maxZ, 2);
+                            }
+                        }
+                    }
+                }
             }
-        }
-        for (double i = minZ; i < maxZ; i += 1d / 3d) {
-            for (double j = 62; j < height; j += 4.0) {
-                p.spawnParticle(Particle.DRIP_LAVA, minX, j, i, 1);
-                p.spawnParticle(Particle.DRIPPING_OBSIDIAN_TEAR, minX, j + 2.0, i, 1);
-            }
-        }
-        for (double i = minZ; i < maxZ; i += 1d / 3d) {
-            for (double j = 62; j < height; j += 4.0) {
-                p.spawnParticle(Particle.DRIP_LAVA, maxX, j, i, 1);
-                p.spawnParticle(Particle.DRIPPING_OBSIDIAN_TEAR, maxX, j + 2.0, i, 1);
+            for (double j = minZ; j <= maxZ; j += 2) { // Side walls
+                boolean isFilledSection = (((int)y / 2) + ((int)j / 2)) % 2 == 0;
+                if (isFilledSection) {
+                    for (double offsetY = 0; offsetY < 2; ++offsetY) {
+                        for (double offsetJ = 0; offsetJ < 2; ++offsetJ) {
+                            double finalY = y + offsetY;
+                            double finalJ = j + offsetJ;
+                            if (finalY <= maxY && finalJ <= maxZ) {
+                                p.spawnParticle(Particle.DRIPPING_OBSIDIAN_TEAR, minX, finalY, finalJ, 2);
+                                p.spawnParticle(Particle.DRIPPING_OBSIDIAN_TEAR, maxX, finalY, finalJ, 2);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -133,10 +169,10 @@ public class Claim implements ConfigurationSerializable {
         Map<String, Object> map = new HashMap<>();
         map.put("world", this.world.getName());
         map.put("x", this.x);
-        map.put("y", this.y); // Serialize the new Y coordinates
+        map.put("y", this.y);
         map.put("z", this.z);
         map.put("x2", this.x2);
-        map.put("y2", this.y2); // Serialize the new Y2 coordinate
+        map.put("y2", this.y2);
         map.put("z2", this.z2);
         return map;
     }

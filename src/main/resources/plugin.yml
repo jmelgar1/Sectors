@@ -6,7 +6,9 @@ api-version: 1.20
 commands:
   sectors:
     description: Use Sectors.
-    aliases: [s, sectors, sec]
+    aliases: [s, sectors, sec, S, Sectors, Sec]
+  savesectors:
+    description: Save sectors.yml
 permissions:
   sec.admin:
     default: op

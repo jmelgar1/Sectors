@@ -19,11 +19,11 @@ max-team-name: 15
 # Maximum description length (in characters)
 max-description-length: 80
 
-# Maximum width distance between 2 claim corners
-max-claim-corner-width: 100
-
 # Maximum height distance between 2 claim corners
 max-claim-height: 100
+
+# Minimum distance between 2 claim corners
+max-claim-width: 100
 
 # Minimum distance between 2 claim corners
 min-claim-width: 10
@@ -70,7 +70,7 @@ msg-must-be-leader: "&cYou must be the leader to do that!"
 msg-player-not-found: "&cPlayer not found."
 not-a-player-or-sector: "&cNo sector found by that name/player."
 msg-no-invite: "&cYou do not have any invitations or the sector you are trying to join is full."
-already-has-claim: "&cYour team already has a claim!"
+already-has-claim: "&cYour sector already has a claim!"
 tried-claim-no-selection: "&cYou must make a selection with /pos1 & /pos2, or use this claiming wand!"
 claim-too-big: "&cClaim too big."
 claim-too-small-or-narrow: "&cClaim too small or narrow"

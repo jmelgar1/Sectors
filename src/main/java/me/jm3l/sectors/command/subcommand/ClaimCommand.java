@@ -44,24 +44,34 @@ public class ClaimCommand implements SubCommand {
 
         // claim min-width check
         if (c.getBounds().getWidthX() <= ConfigManager.MIN_CLAIM_WIDTH || c.getBounds().getWidthZ() <= ConfigManager.MIN_CLAIM_WIDTH) {
+            p.sendMessage("x: " + c.getBounds().getWidthX());
+            p.sendMessage("z: " + c.getBounds().getWidthZ());
+            p.sendMessage("min claim width: " + ConfigManager.MIN_CLAIM_WIDTH);
             p.sendMessage(ConfigManager.CLAIM_TOO_NARROW);
             return;
         }
 
         // claim max-width check
         if (c.getBounds().getWidthX() >= ConfigManager.MAX_CLAIM_WIDTH || c.getBounds().getWidthZ() >= ConfigManager.MAX_CLAIM_WIDTH) {
+            p.sendMessage("x: " + c.getBounds().getWidthX());
+            p.sendMessage("z: " + c.getBounds().getWidthZ());
+            p.sendMessage("max claim width: " + ConfigManager.MAX_CLAIM_WIDTH);
             p.sendMessage(ConfigManager.CLAIM_TOO_BIG);
             return;
         }
 
         // max-claim height check
         if (c.getBounds().getHeight() >= ConfigManager.MAX_CLAIM_HEIGHT) {
+            p.sendMessage("y: " + c.getBounds().getHeight());
+            p.sendMessage("max claim height: " + ConfigManager.MAX_CLAIM_HEIGHT);
             p.sendMessage(ConfigManager.CLAIM_TOO_BIG);
             return;
         }
 
         // min-claim height check
         if (c.getBounds().getHeight() <= ConfigManager.MIN_CLAIM_HEIGHT) {
+            p.sendMessage("y: " + c.getBounds().getHeight());
+            p.sendMessage("min claim height: " + ConfigManager.MIN_CLAIM_HEIGHT);
             p.sendMessage(ConfigManager.CLAIM_TOO_NARROW);
             return;
         }
@@ -72,6 +82,7 @@ public class ClaimCommand implements SubCommand {
         }
 
         s.setClaim(c);
+        p.getInventory().remove(plugin.getWand());
         p.sendMessage(ConfigManager.SUCCESS);
     }
 }

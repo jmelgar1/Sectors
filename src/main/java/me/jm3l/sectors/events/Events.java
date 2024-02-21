@@ -16,7 +16,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -27,7 +30,6 @@ public class Events implements Listener {
     public Events(Sectors plugin) {
         this.plugin = plugin;
     }
-    public static final HashMap<UUID, ClaimSelection> playerSelections = new HashMap<>();
 
 //    @EventHandler
 //    public void onInteract(PlayerInteractEvent event) {
@@ -125,6 +127,28 @@ public class Events implements Listener {
         if(!isActionLegal(e.getPlayer(), e.getBlock().getLocation())) {
             e.getPlayer().sendMessage(ChatColor.RED + "Area is claimed");
             e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        for (Sector s : plugin.getData().getSectors()) {
+            if (s.hasMember(e.getPlayer())) {
+                plugin.getData().addSPlayer(e.getPlayer(), s);
+                break;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onLeave(PlayerQuitEvent e) {
+        plugin.getData().removeSPlayer(e.getPlayer());
+    }
+
+    @EventHandler
+    public void dropItem(PlayerDropItemEvent e){
+        if(plugin.getClaimWand().isWand(e.getItemDrop().getItemStack())){
+            e.getItemDrop().remove();
         }
     }
 //
