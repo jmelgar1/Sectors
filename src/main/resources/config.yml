@@ -1,0 +1,89 @@
+# Set to true for miner, archer, and bard kits to function.
+use-kits: true
+
+# Set to true if you wish for players to be raidable when at or below 0 DTR
+enable-raiding: true
+
+# Show sector claim coordinates when you do /f info
+show-coords-in-info: true
+
+# Set to true to add a customizable delay to /f home
+use-tp-delay: false
+
+# Teleport delay (seconds).
+teleport-delay: 5
+
+# Maximum team name length (in characters)
+max-team-name: 15
+
+# Maximum description length (in characters)
+max-description-length: 80
+
+# Maximum width distance between 2 claim corners
+max-claim-corner-width: 100
+
+# Maximum height distance between 2 claim corners
+max-claim-height: 100
+
+# Minimum distance between 2 claim corners
+min-claim-width: 10
+
+# Minimum height distance between 2 claim corners
+min-claim-height: 10
+
+# Maximum members in sector (excluding leader)
+max-members: 5
+
+# Minimum DTR so it does not drop too low. This does not affect the raidability threshold
+minimum-dtr: -1
+
+# Maximum DTR (So you can have more sector members without too high of DTR)
+maximum-dtr: 8
+
+# How often (in ticks) to regenerate 1 DTR for all sector
+dtr-regen: 36000
+
+# Archer tag duration in seconds (Archer tag only works if use-kits = true)
+archer-tag-length: 5
+
+# Archer tag damage multiplier
+archer-tag-multiplier: 1.5
+
+#Enderpearl cooldown (in seconds). Vanilla Minecraft is 1 second.
+enderpearl-cooldown: 10
+
+# Set this to true to allow chat formatting (To show team names in chat)
+format-chat: true
+
+# Formatting
+formatted-chat: "{team}::{name} > {message}"
+no-team-formatted-chat: "{name} > {message}"
+
+# Allow mobs to spawn in claims
+mob-spawn-in-claims: false
+
+# Configurable Messages Below
+no-permission: "&cNo permission."
+msg-success: "&eSuccess!"
+msg-must-be-in-sector: "&cYou must be in a sector to do that!"
+msg-must-be-leader: "&cYou must be the leader to do that!"
+msg-player-not-found: "&cPlayer not found."
+not-a-player-or-sector: "&cNo sector found by that name/player."
+msg-no-invite: "&cYou do not have any invitations or the sector you are trying to join is full."
+already-has-claim: "&cYour team already has a claim!"
+tried-claim-no-selection: "&cYou must make a selection with /pos1 & /pos2, or use this claiming wand!"
+claim-too-big: "&cClaim too big."
+claim-too-small-or-narrow: "&cClaim too small or narrow"
+land-already-claimed: "&cLand is already claimed."
+must-have-claim: "&cYou need to have a claim!"
+home-must-be-in-claim: "&cYour home must be inside your claim!"
+already-in-sector: "&cYou are already in a sector!"
+name-too-long: "&sector name is too long!"
+name-taken: "&cThat name is already taken!"
+invalid-name: "&cTry another name with A-Z only!"
+sector-founded: "&sector &f{sector} &ehas been founded!" #Use {sector} to get the name of the founded sector
+teleport-pending: "&eTeleporting to sector home in &f{seconds} &eseconds. Do not engage in PvP combat."
+archer-tagged: "&cYou have been archer tagged!"
+
+# PlaceholderAPI Settings
+show-color-in-placeholder: true
