@@ -13,8 +13,8 @@ use-tp-delay: false
 # Teleport delay (seconds).
 teleport-delay: 5
 
-# Maximum team name length (in characters)
-max-team-name: 15
+# Maximum sector name length (in characters)
+max-sector-name: 15
 
 # Maximum description length (in characters)
 max-description-length: 80
@@ -57,7 +57,7 @@ format-chat: true
 
 # Formatting
 formatted-chat: "{team}::{name} > {message}"
-no-team-formatted-chat: "{name} > {message}"
+no-sector-formatted-chat: "{name} > {message}"
 
 # Allow mobs to spawn in claims
 mob-spawn-in-claims: false

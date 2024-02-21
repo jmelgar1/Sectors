@@ -1,13 +1,11 @@
 package me.jm3l.sectors.events;
 
-import com.sk89q.worldedit.internal.annotation.Selection;
 import me.jm3l.sectors.FileUtils.ConfigManager;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.objects.ClaimSelection;
 import me.jm3l.sectors.objects.Sector;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -16,12 +14,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -30,29 +26,7 @@ public class Events implements Listener {
     public Events(Sectors plugin) {
         this.plugin = plugin;
     }
-
-//    @EventHandler
-//    public void onInteract(PlayerInteractEvent event) {
-//        Player p = event.getPlayer();
-//        if (p.getInventory().getItemInMainHand().getType() == Material.CARROT_ON_A_STICK) {
-//            if (playerSelections.containsKey(p.getUniqueId())) {
-//                ClaimSelection selection = playerSelections.get(p.getUniqueId());
-//                if (selection.isSelectionMode()) {
-//                    // Check if action is right or left click to set point 1 or point 2
-//                    if (selection.getPoint1() == null) { // Set first point
-//                        selection.setPoint1(p.getLocation());
-//                        p.sendMessage("First point set." + selection.getPoint1());
-//                    } else if (selection.getPoint2() == null) { // Set second point
-//                        selection.setPoint2(p.getLocation());
-//                        p.sendMessage("Second point set."  + selection.getPoint2());
-////                        // Optional: Automatically disable selection mode after second point is set
-////                        selection.setSelectionMode(false);
-//                        p.sendMessage("Selection complete. You can now use /sectors claim.");
-//                    }
-//                }
-//            }
-//        }
-//    }
+    private Map<UUID, Sector> playerCurrentSector = new HashMap<>();
 
     boolean isActionLegal(Player player, Location event){
         Sector playerSec = plugin.getData().getSector(player);
@@ -141,9 +115,7 @@ public class Events implements Listener {
     }
 
     @EventHandler
-    public void onLeave(PlayerQuitEvent e) {
-        plugin.getData().removeSPlayer(e.getPlayer());
-    }
+    public void onLeave(PlayerQuitEvent e) {plugin.getData().removeSPlayer(e.getPlayer());}
 
     @EventHandler
     public void dropItem(PlayerDropItemEvent e){
@@ -151,30 +123,36 @@ public class Events implements Listener {
             e.getItemDrop().remove();
         }
     }
-//
-//    @EventHandler
-//    public void onBlockBreak(BlockBreakEvent event) {
-//        Player player = event.getPlayer();
-//        if (playerSelections.containsKey(player.getUniqueId())) {
-//            ClaimSelection selection = playerSelections.get(player.getUniqueId());
-//            if (selection.isSelectionMode()) {
-//                // Prevent block breaking in selection mode
-//                event.setCancelled(true);
-//                player.sendMessage("You cannot break blocks while in selection mode.");
-//            }
-//        }
-//    }
 
-//    @EventHandler
-//    public void onBlockPlace(BlockPlaceEvent event) {
-//        Player player = event.getPlayer();
-//        if (playerSelections.containsKey(player.getUniqueId())) {
-//            ClaimSelection selection = playerSelections.get(player.getUniqueId());
-//            if (selection.isSelectionMode()) {
-//                // Prevent block placing in selection mode
-//                event.setCancelled(true);
-//                player.sendMessage("You cannot place blocks while in selection mode.");
-//            }
-//        }
-//    }
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        if (e.getFrom().getBlock().equals(e.getTo().getBlock()))
+            return;
+
+        Player player = e.getPlayer();
+        UUID playerId = player.getUniqueId();
+        Location toLocation = e.getTo();
+        Sector newSector = null;
+
+        // Find if the player has moved into a new sector
+        for (Sector s : plugin.getData().getSectors()) {
+            if (s.hasClaim() && s.getClaim().containsLocation(toLocation)) {
+                newSector = s;
+                break;
+            }
+        }
+
+        Sector currentSector = playerCurrentSector.get(playerId);
+
+        // Notify the player if they have entered a new sector
+        if (newSector != null && !newSector.equals(currentSector)) {
+            player.sendMessage(ChatColor.YELLOW + "You have entered the claim of " + newSector.getName() + ".");
+            playerCurrentSector.put(playerId, newSector);
+        }
+        // Notify the player if they have left a sector
+        else if (currentSector != null && (newSector == null || !newSector.equals(currentSector))) {
+            player.sendMessage(ChatColor.YELLOW + "You have left the claim of " + currentSector.getName() + ".");
+            playerCurrentSector.remove(playerId);
+        }
+    }
 }

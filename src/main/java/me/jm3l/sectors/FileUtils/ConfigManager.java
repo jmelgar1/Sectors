@@ -8,7 +8,7 @@ public class ConfigManager {
 
     public static void loadConfig(final FileConfiguration config){
 
-        MAX_SECTOR_NAME = config.getInt("max-team-name");
+        MAX_SECTOR_NAME = config.getInt("max-sector-name");
         MAX_CLAIM_WIDTH = config.getInt("max-claim-width");
         MAX_CLAIM_HEIGHT = config.getInt("max-claim-height");
         MIN_CLAIM_WIDTH = config.getInt("min-claim-width");
@@ -25,7 +25,7 @@ public class ConfigManager {
 
 
         FORMATTED_CHAT = translateAlternateColorCodes('&', config.getString("formatted-chat"));
-        NO_TEAM_FORMATTED_CHAT = translateAlternateColorCodes('&', config.getString("no-team-formatted-chat"));
+        NO_SECTOR_FORMATTED_CHAT = translateAlternateColorCodes('&', config.getString("no-sector-formatted-chat"));
 
         NO_PERMISSION = translateAlternateColorCodes('&', config.getString("no-permission"));
         NOT_IN_SECTOR = translateAlternateColorCodes('&', config.getString("msg-must-be-in-sector"));
@@ -85,7 +85,7 @@ public class ConfigManager {
     public static boolean MOB_SPAWN_IN_CLAIMS;
     public static String NO_PERMISSION;
     public static String FORMATTED_CHAT;
-    public static String NO_TEAM_FORMATTED_CHAT;
+    public static String NO_SECTOR_FORMATTED_CHAT;
     public static String NOT_IN_SECTOR;
     public static String SUCCESS;
     public static String MUST_BE_LEADER;
