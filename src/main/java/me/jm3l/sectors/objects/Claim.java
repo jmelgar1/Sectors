@@ -1,6 +1,5 @@
 package me.jm3l.sectors.objects;
 
-import com.sk89q.worldedit.internal.annotation.Selection;
 import me.jm3l.sectors.Sectors;
 import org.bukkit.*;
 import org.bukkit.configuration.MemorySection;

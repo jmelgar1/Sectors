@@ -23,9 +23,7 @@ import java.util.UUID;
 
 public class Events implements Listener {
     private Sectors plugin;
-    public Events(Sectors plugin) {
-        this.plugin = plugin;
-    }
+    public Events(Sectors plugin) {this.plugin = plugin;}
     private Map<UUID, Sector> playerCurrentSector = new HashMap<>();
 
     boolean isActionLegal(Player player, Location event){

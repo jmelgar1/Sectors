@@ -4,8 +4,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
 
-import java.awt.*;
-
 public class ClaimSelection {
     private Vector start, end;
     private World world;

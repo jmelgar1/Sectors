@@ -1,4 +1,4 @@
-package me.jm3l.sectors.utilities;
+package me.jm3l.sectors.command.wand;
 
 import me.jm3l.sectors.Sectors;
 import org.bukkit.Material;

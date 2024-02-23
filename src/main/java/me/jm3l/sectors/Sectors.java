@@ -10,7 +10,7 @@ import me.jm3l.sectors.events.Events;
 import me.jm3l.sectors.objects.Claim;
 import me.jm3l.sectors.objects.Sector;
 import me.jm3l.sectors.runnables.ClaimParticleTask;
-import me.jm3l.sectors.utilities.ClaimWand;
+import me.jm3l.sectors.command.wand.ClaimWand;
 import me.jm3l.sectors.utilities.PlayerData;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.inventory.ItemStack;
