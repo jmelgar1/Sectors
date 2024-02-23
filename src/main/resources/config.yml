@@ -1,3 +1,8 @@
+#=====Claim Tool=====
+default-reach: 5 #Distance in which the selection reference will appear.
+max-claim-reach: 25 #Max reach of the claim selection tool.
+min-claim-reach: 3 #Min reach of the claim selection tool.
+
 # Set to true for miner, archer, and bard kits to function.
 use-kits: true
 

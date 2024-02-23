@@ -8,6 +8,11 @@ public class ConfigManager {
 
     public static void loadConfig(final FileConfiguration config){
 
+        // Claim Tool
+        DEFAULT_REACH = config.getInt("default-reach");
+        MAX_CLAIM_REACH = config.getInt("max-claim-reach");
+        MIN_CLAIM_REACH = config.getInt("min-claim-reach");
+
         MAX_SECTOR_NAME = config.getInt("max-sector-name");
         MAX_CLAIM_WIDTH = config.getInt("max-claim-width");
         MAX_CLAIM_HEIGHT = config.getInt("max-claim-height");
@@ -62,6 +67,9 @@ public class ConfigManager {
     /*
     Configurable things
      */
+    public static int MAX_CLAIM_REACH;
+    public static int MIN_CLAIM_REACH;
+    public static int DEFAULT_REACH;
     public static int MAXIMUM_DTR;
     public static int MAX_SECTOR_NAME;
     public static int MAX_MEMBERS;

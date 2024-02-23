@@ -1,5 +1,6 @@
 package me.jm3l.sectors.events;
 
+import me.jm3l.sectors.FileUtils.ConfigManager;
 import me.jm3l.sectors.Sectors;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -51,11 +52,11 @@ public class ClaimToolEvents implements Listener {
 
             if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
                 // Increase distance
-                plugin.getClaimParticleTask().getPlayerMarkerDistances().put(playerUUID, Math.min(currentDistance + 1, 15));
+                plugin.getClaimParticleTask().getPlayerMarkerDistances().put(playerUUID, Math.min(currentDistance + 1, ConfigManager.MAX_CLAIM_REACH));
                 event.setCancelled(true);
             } else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
                 // Decrease distance
-                plugin.getClaimParticleTask().getPlayerMarkerDistances().put(playerUUID, Math.max(currentDistance - 1, 1));
+                plugin.getClaimParticleTask().getPlayerMarkerDistances().put(playerUUID, Math.max(currentDistance - 1, ConfigManager.MIN_CLAIM_REACH));
                 event.setCancelled(true);
             }
         }
@@ -72,9 +73,9 @@ public class ClaimToolEvents implements Listener {
 
                 // Check if the entity being hit is the player's marker
                 if (marker != null && event.getEntity().equals(marker)) {
-                    int currentDistance = plugin.getClaimParticleTask().getPlayerMarkerDistances().getOrDefault(playerUUID, 5);
+                    int currentDistance = plugin.getClaimParticleTask().getPlayerMarkerDistances().getOrDefault(playerUUID, ConfigManager.DEFAULT_REACH);
                     // Increase distance, considering the marker might be too close
-                    plugin.getClaimParticleTask().getPlayerMarkerDistances().put(playerUUID, Math.min(currentDistance + 1, 15));
+                    plugin.getClaimParticleTask().getPlayerMarkerDistances().put(playerUUID, Math.min(currentDistance + 1, ConfigManager.MAX_CLAIM_REACH));
 
                     // Cancel the event to prevent damage
                     event.setCancelled(true);

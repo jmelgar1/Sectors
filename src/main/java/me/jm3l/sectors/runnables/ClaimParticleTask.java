@@ -6,12 +6,11 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import me.jm3l.sectors.FileUtils.ConfigManager;
 import me.jm3l.sectors.Sectors;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.*;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -25,8 +24,6 @@ public class ClaimParticleTask extends BukkitRunnable {
     private Map<UUID, Integer> playerMarkerDistances = new HashMap<>();
     public Map<UUID, Integer> getPlayerMarkerDistances() {return playerMarkerDistances;}
 
-    private final int DEFAULT_DISTANCE = 5;
-    public int getDEFAULT_DISTANCE() {return DEFAULT_DISTANCE;}
 
     private Sectors plugin;
     public ClaimParticleTask(Sectors plugin) {
@@ -39,7 +36,7 @@ public class ClaimParticleTask extends BukkitRunnable {
             if (plugin.getClaimToolEvents().getClaimModePlayers().containsKey(p.getUniqueId()) &&
                     plugin.getClaimWand().isWand(p.getInventory().getItemInMainHand())) {
 
-                int distance = playerMarkerDistances.getOrDefault(p.getUniqueId(), DEFAULT_DISTANCE);
+                int distance = playerMarkerDistances.getOrDefault(p.getUniqueId(), ConfigManager.DEFAULT_REACH);
                 Vector direction = p.getLocation().getDirection();
                 Location targetLocation = p.getEyeLocation().add(direction.multiply(distance));
 
@@ -65,15 +62,6 @@ public class ClaimParticleTask extends BukkitRunnable {
 
         // Spawn the entity server-side in a standard way (this entity won't be used directly)
         Entity tempEntity = world.spawnEntity(location, EntityType.SHULKER);
-
-        // Make the temporary entity invisible and silent, so it doesn't affect gameplay
-        if (tempEntity instanceof LivingEntity livingEntity) {
-            livingEntity.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false));
-            livingEntity.setSilent(true);
-            livingEntity.setInvulnerable(true);
-        }
-
-        // Remove the entity so it won't be visible to anyone
         tempEntity.remove();
 
         // create packet and send to player
@@ -91,17 +79,12 @@ public class ClaimParticleTask extends BukkitRunnable {
         spawnPacket.getEntityTypeModifier()
                 .write(0, EntityType.SHULKER);
 
-
-        // Attempt to send the packet to the player
         try {
             protocolManager.sendServerPacket(player, spawnPacket);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        //TRY FALLING BLOCK?
-
-        // Metadata packet to apply visual effects, such as invisibility
         PacketContainer metadata = protocolManager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
         List<WrappedDataValue> dataValues = List.of(
                 new WrappedDataValue(0, WrappedDataWatcher.Registry.get(Byte.class), (byte) (0x20 | 0x40)) // GLOWING & INVISIBILITY
@@ -138,6 +121,14 @@ public class ClaimParticleTask extends BukkitRunnable {
     public void teleportEntityPacket(Entity shulker, Location newLocation, Player player) {
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         PacketContainer teleportPacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_TELEPORT);
+
+        Location playerLocation = player.getLocation();
+        if (playerLocation.getBlockY() > newLocation.getBlockY()) {
+            newLocation.add(0, -1, 0);
+            if(player.getFallDistance() > 1.5){
+                newLocation.add(0, -3, 0);
+            }
+        }
 
         teleportPacket.getIntegers()
                 .write(0, shulker.getEntityId());
