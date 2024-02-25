@@ -19,10 +19,10 @@ public class ClaimWand {
 
     public ClaimWand(final Sectors plugin) {
         key = new NamespacedKey(plugin, "wand");
-        wand = new ItemStack(Material.CARROT_ON_A_STICK, 1);
+        wand = new ItemStack(Material.WARPED_FUNGUS_ON_A_STICK, 1);
         final ItemMeta meta = wand.getItemMeta();
         assert meta != null;
-        meta.setLore(Arrays.asList("Left Click - Position 1", "Right Click - Position 2"));
+        meta.setLore(Arrays.asList("Left Click - Increase Reach", "Right Click - Decrease Reach", "F - Select Position"));
         meta.setDisplayName("Claiming Wand");
         meta.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
         wand.setItemMeta(meta);
@@ -30,7 +30,7 @@ public class ClaimWand {
 
     public boolean isWand(ItemStack s){
         if(s == null) return false;
-        if(!s.getType().equals(Material.CARROT_ON_A_STICK)) return false;
+        if(!s.getType().equals(Material.WARPED_FUNGUS_ON_A_STICK)) return false;
         ItemMeta meta = s.getItemMeta();
         assert meta != null;
         PersistentDataContainer container = meta.getPersistentDataContainer();

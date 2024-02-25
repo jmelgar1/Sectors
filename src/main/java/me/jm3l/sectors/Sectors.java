@@ -5,7 +5,7 @@ import com.comphenix.protocol.ProtocolManager;
 import me.jm3l.sectors.FileUtils.ConfigManager;
 import me.jm3l.sectors.FileUtils.SectorsFile;
 import me.jm3l.sectors.command.SCommand;
-import me.jm3l.sectors.events.ClaimToolEvents;
+import me.jm3l.sectors.command.wand.events.ClaimToolEvents;
 import me.jm3l.sectors.events.Events;
 import me.jm3l.sectors.objects.Claim;
 import me.jm3l.sectors.objects.Sector;

@@ -2,7 +2,6 @@ package me.jm3l.sectors.events;
 
 import me.jm3l.sectors.FileUtils.ConfigManager;
 import me.jm3l.sectors.Sectors;
-import me.jm3l.sectors.objects.ClaimSelection;
 import me.jm3l.sectors.objects.Sector;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -11,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.*;
@@ -44,34 +42,7 @@ public class Events implements Listener {
         Location location = block.getLocation();
         Player p = e.getPlayer();
         if(plugin.getClaimWand().isWand(e.getItem())) {
-            if (e.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
-                ClaimSelection s = plugin.getData().getSelection(p);
-                if (s == null) {
-                    ClaimSelection selection = new ClaimSelection();
-                    selection.setPos1(location);
-                    plugin.getData().getSelections().put(p, selection);
-                    p.sendMessage(ChatColor.YELLOW + "Position 1 set.");
-                    return;
-                }
-                s.setPos1(location);
-                p.sendMessage(ChatColor.YELLOW + "Position 1 set.");
-                return;
-            }
-            if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-                ClaimSelection s = plugin.getData().getSelection(p);
-                if (s == null) {
-                    ClaimSelection selection = new ClaimSelection();
-                    selection.setPos2(location);
-                    plugin.getData().getSelections().put(p, selection);
-                    p.sendMessage(ChatColor.YELLOW + "Position 2 set.");
-                    e.setCancelled(true);
-                    return;
-                }
-                s.setPos2(location);
-                p.sendMessage(ChatColor.YELLOW + "Position 2 set.");
-                e.setCancelled(true);
-                return;
-            }
+            e.setCancelled(true);
         }
         if(e.getPlayer().hasPermission("sec.admin")) return;
         if(!isActionLegal(p, location)) {
