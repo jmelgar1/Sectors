@@ -26,7 +26,6 @@ dependencies {
   paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
 
   // Additional dependencies
-  //compileOnly("org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT")
   compileOnly(group = "com.sk89q.worldedit", name = "worldedit-bukkit", version = "7.2.19")
   compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
 }
