@@ -2,6 +2,9 @@ package me.jm3l.sectors.objects;
 
 import me.jm3l.sectors.FileUtils.ConfigManager;
 import me.jm3l.sectors.Sectors;
+import me.jm3l.sectors.manager.ServiceManager;
+import me.jm3l.sectors.objects.claim.Claim;
+import me.jm3l.sectors.objects.claim.util.ClaimUtilities;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,7 +16,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import java.util.*;
 
 public class Sector implements ConfigurationSerializable {
-    private Sectors data;
+    private Sectors plugin;
 
     //Attributes
     private final String name;
@@ -156,14 +159,14 @@ public class Sector implements ConfigurationSerializable {
         this.name = name;
         this.leader = p.getUniqueId();
         this.dtr = 2;
-        this.data = data;
-        this.data.getData().addSPlayer(p, this);
+        this.plugin = data;
+        this.plugin.getData().addSPlayer(p, this);
         this.kills = 0;
     }
 
     //Constructor for loaded sector
     public Sector(Map<String, Object> map, final Sectors data) {
-        this.data = data;
+        this.plugin = data;
         this.name = (String) map.get("name");
         if (map.get("leader") != null) this.leader = UUID.fromString((String) map.get("leader"));
         for (String m : (ArrayList<String>) map.get("members")) {
@@ -232,7 +235,7 @@ public class Sector implements ConfigurationSerializable {
             p.sendMessage(ChatColor.GREEN + "Claim start: " + this.claim.start() +
                     "\n" + "Claim end: " + this.claim.end());
             if (this.claim.getBounds().contains(p.getLocation().toVector())) {
-                this.claim.showBounds(p);
+                ClaimUtilities.showGlowingBounds(this.claim.getEdgeLocations(), p, plugin, ServiceManager.getPlayerEntityService());
             }
         } else {
             p.sendMessage(ChatColor.YELLOW + "This sector does not have a claim.");
@@ -241,11 +244,11 @@ public class Sector implements ConfigurationSerializable {
 
     //Disband sector and delete all SPlayers
     public void disband() {
-        data.getData().removeSPlayer(Bukkit.getPlayer(this.leader));
+        plugin.getData().removeSPlayer(Bukkit.getPlayer(this.leader));
         for (UUID id : this.getMembers()) {
-            data.getData().removeSPlayer(Bukkit.getPlayer(id));
+            plugin.getData().removeSPlayer(Bukkit.getPlayer(id));
         }
-        data.getData().removeSector(this);
+        plugin.getData().removeSector(this);
         Bukkit.broadcastMessage(ChatColor.YELLOW + "Sector " + ChatColor.WHITE + this.name + ChatColor.YELLOW + " has been disbanded!");
     }
 
@@ -257,7 +260,7 @@ public class Sector implements ConfigurationSerializable {
             return true;
         }
         if (this.members.remove(p)) {
-            data.getData().removeSPlayer(Bukkit.getPlayer(p)); //Remove from FPlayers if online
+            plugin.getData().removeSPlayer(Bukkit.getPlayer(p)); //Remove from FPlayers if online
             this.broadcast(Bukkit.getOfflinePlayer(p).getName() + ChatColor.GOLD + " is no longer in the sector.");
             return true;
         }
@@ -267,7 +270,7 @@ public class Sector implements ConfigurationSerializable {
     //Add player to sector, player must be online to join so we use Player
     public void addPlayer(final Player p) {
         this.members.add(p.getUniqueId());
-        data.getData().addSPlayer(p, this); //Add player to SPlayers so interactions work.
+        plugin.getData().addSPlayer(p, this); //Add player to SPlayers so interactions work.
         this.broadcast(ChatColor.YELLOW + p.getName() + " has joined the sector!");
     }
 

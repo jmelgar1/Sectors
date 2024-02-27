@@ -1,10 +1,9 @@
 package me.jm3l.sectors.utilities;
 
-import com.sk89q.worldedit.internal.annotation.Selection;
 import me.jm3l.sectors.FileUtils.ConfigManager;
 import me.jm3l.sectors.exceptions.NotInSector;
-import me.jm3l.sectors.objects.ClaimSelection;
 import me.jm3l.sectors.objects.Sector;
+import me.jm3l.sectors.objects.claim.ClaimSelection;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -76,7 +75,6 @@ public class PlayerData {
         return null;
     }
     public Sector getSectorOrError(Player p) throws NotInSector {
-        p.sendMessage(String.valueOf(sPlayers));
         if(!sPlayers.containsKey(p)){
             p.sendMessage(ConfigManager.NOT_IN_SECTOR);
             throw new NotInSector();

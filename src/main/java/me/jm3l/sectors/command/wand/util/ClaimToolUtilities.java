@@ -6,6 +6,8 @@ import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import me.jm3l.sectors.FileUtils.ConfigManager;
 import me.jm3l.sectors.Sectors;
+import me.jm3l.sectors.manager.ServiceManager;
+import me.jm3l.sectors.objects.claim.util.ClaimUtilities;
 import me.jm3l.sectors.utilities.PacketPair;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -109,7 +111,14 @@ public class ClaimToolUtilities {
         plugin.getClaimToolEvents().getClaimModePlayers().remove(pUUID);
         plugin.getClaimParticleTask().getPlayerMarkerDistances().remove(pUUID);
 
-        ClaimToolUtilities.removeMarketPacket(p, plugin.getClaimParticleTask().getPlayerMarkers().get(pUUID), plugin);
+        if(plugin.getClaimParticleTask().getPlayerMarkers().get(pUUID) != null){
+            ClaimToolUtilities.removeMarketPacket(p, plugin.getClaimParticleTask().getPlayerMarkers().get(pUUID), plugin);
+        }
+
+        if(plugin.getData().getSelection(p) != null){
+            plugin.getData().getSelections().remove(p);
+        }
+
         PacketPair packetPair = plugin.getClaimToolEvents().getPlayerClaimPositions().get(pUUID);
         if (packetPair != null) {
             if (packetPair.getPacketOne() != null) {
@@ -119,6 +128,10 @@ public class ClaimToolUtilities {
                 ClaimToolUtilities.removeMarketPacket(p, packetPair.getPacketTwo(), plugin);
             }
             plugin.getClaimToolEvents().getPlayerClaimPositions().remove(pUUID);
+        }
+
+        if(!ServiceManager.getPlayerEntityService().getEntityIDsForPlayer(p).isEmpty()) {
+            ClaimUtilities.removeGlowingBounds(p, plugin);
         }
     }
 }

@@ -5,7 +5,6 @@ import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.command.SubCommand;
 import me.jm3l.sectors.exceptions.NotInSector;
 import me.jm3l.sectors.objects.Sector;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 

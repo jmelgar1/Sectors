@@ -1,13 +1,12 @@
 package me.jm3l.sectors.command.subcommand;
 
-import com.sk89q.worldedit.internal.annotation.Selection;
 import me.jm3l.sectors.FileUtils.ConfigManager;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.command.SubCommand;
 import me.jm3l.sectors.exceptions.NotInSector;
-import me.jm3l.sectors.objects.Claim;
-import me.jm3l.sectors.objects.ClaimSelection;
 import me.jm3l.sectors.objects.Sector;
+import me.jm3l.sectors.objects.claim.Claim;
+import me.jm3l.sectors.objects.claim.ClaimSelection;
 import org.bukkit.entity.Player;
 
 public class ClaimCommand implements SubCommand {
@@ -83,6 +82,7 @@ public class ClaimCommand implements SubCommand {
 
         s.setClaim(c);
         p.getInventory().remove(plugin.getWand());
+        plugin.getData().getSelections().remove(p);
         p.sendMessage(ConfigManager.SUCCESS);
     }
 }

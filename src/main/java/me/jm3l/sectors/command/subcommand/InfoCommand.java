@@ -5,12 +5,8 @@ import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.command.SubCommand;
 import me.jm3l.sectors.exceptions.NotInSector;
 import me.jm3l.sectors.objects.Sector;
-import me.jm3l.sectors.utilities.PlayerData;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-
-import java.util.regex.Pattern;
 
 public class InfoCommand implements SubCommand {
     @Override

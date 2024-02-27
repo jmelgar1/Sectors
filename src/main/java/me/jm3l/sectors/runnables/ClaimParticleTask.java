@@ -5,10 +5,12 @@ import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.command.wand.util.ClaimToolUtilities;
 import me.jm3l.sectors.utilities.PacketPair;
 import org.bukkit.Location;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class ClaimParticleTask extends BukkitRunnable {
 
