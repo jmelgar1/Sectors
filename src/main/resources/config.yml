@@ -57,11 +57,11 @@ archer-tag-multiplier: 1.5
 #Enderpearl cooldown (in seconds). Vanilla Minecraft is 1 second.
 enderpearl-cooldown: 10
 
-# Set this to true to allow chat formatting (To show team names in chat)
+# Set this to true to allow chat formatting (To show sector names in chat)
 format-chat: true
 
 # Formatting
-formatted-chat: "{team}::{name} > {message}"
+formatted-chat: "{sector}::{name} > {message}"
 no-sector-formatted-chat: "{name} > {message}"
 
 # Allow mobs to spawn in claims
