@@ -76,13 +76,10 @@ public final class Sectors extends JavaPlugin {
         claimParticleTask.runTaskTimer(this, 0L, 1L);
 
         protocolManager = ProtocolLibrary.getProtocolManager();
-
-        System.out.println("[ON] Sector Enabled");
     }
 
     @Override
     public void onDisable() {
         sectorsFile.saveSectors();
-        System.out.println("[OFF] Sector Disabled");
     }
 }

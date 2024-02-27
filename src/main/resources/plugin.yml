@@ -1,5 +1,6 @@
 name: Sectors
-version: '${version}'
+version: 1.0-ALPHA
+description: A unique area claiming plugin for Minecraft
 main: me.jm3l.sectors.Sectors
 author: jm3L
 api-version: 1.20
