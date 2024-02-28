@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SectorsFile {
-    private Sectors plugin;
+    private final Sectors plugin;
 
     public SectorsFile(final Sectors plugin){
         this.plugin = plugin;

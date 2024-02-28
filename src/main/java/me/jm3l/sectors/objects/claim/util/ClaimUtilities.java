@@ -10,7 +10,9 @@ import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.service.PlayerEntityService;
 import me.jm3l.sectors.utilities.VectorPair;
+import me.jm3l.sectors.utilities.nms.NmsRegistry;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -25,37 +27,33 @@ public class ClaimUtilities {
         ProtocolManager protocolManager = plugin.getProtocolManager();
 
         for (Location loc : edgeLocations) {
-            loc.add(0, 1, 0);
+            loc.add(0.5, 0, 0.5);
 
             PacketContainer spawnPacket = protocolManager.createPacket(PacketType.Play.Server.SPAWN_ENTITY);
             int uniqueId = (int) (Math.random() * Integer.MAX_VALUE);
 
             spawnPacket.getIntegers()
-                    .write(0, uniqueId);
+                .write(0, uniqueId)
+                .write(4, NmsRegistry.getBlockId(Material.WHITE_STAINED_GLASS.createBlockData()));
             spawnPacket.getUUIDs()
-                    .write(0, UUID.randomUUID());
+                .write(0, UUID.randomUUID());
             spawnPacket.getEntityTypeModifier()
-                    .write(0, EntityType.FALLING_BLOCK);
+                .write(0, EntityType.FALLING_BLOCK);
             spawnPacket.getDoubles()
-                    .write(0, loc.getX())
-                    .write(1, loc.getY())
-                    .write(2, loc.getZ());
-
-//            Block block = // whatever
-//            int stateId = net.minecraft.world.level.block.Block.getId(((CraftBlockData) block.getData).getState())
-//            spawnPacket.getIntegers().write(4, 8);
+                .write(0, loc.getX())
+                .write(1, loc.getY())
+                .write(2, loc.getZ());
 
             protocolManager.sendServerPacket(p, spawnPacket);
 
             PacketContainer metadataPacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
             metadataPacket.getModifier().writeDefaults();
             metadataPacket.getIntegers().write(0, uniqueId);
-//            metadataPacket.getBlockData().write(0,
-//                    WrappedBlockData.createData(Material.GLASS));
 
             WrappedDataWatcher.Serializer booleanType = WrappedDataWatcher.Registry.get(Boolean.class);
             List<WrappedDataValue> values = Lists.newArrayList(
-                    new WrappedDataValue(5, booleanType, true)
+                new WrappedDataValue(0, WrappedDataWatcher.Registry.get(Byte.class), (byte) (0x40)),
+                new WrappedDataValue(5, booleanType, true)
             );
 
             metadataPacket.getDataValueCollectionModifier().write(0, values);
@@ -99,7 +97,7 @@ public class ClaimUtilities {
         return locations;
     }
 
-    public static VectorPair vectorTransformation(Vector vector1, Vector vector2){
+    public static VectorPair vectorTransformation(Vector vector1, Vector vector2) {
         int x = Math.min(vector1.getBlockX(), vector2.getBlockX());
         int y = Math.min(vector1.getBlockY(), vector2.getBlockY());
         int z = Math.min(vector1.getBlockZ(), vector2.getBlockZ());
@@ -107,20 +105,18 @@ public class ClaimUtilities {
         int y2 = Math.max(vector1.getBlockY(), vector2.getBlockY());
         int z2 = Math.max(vector1.getBlockZ(), vector2.getBlockZ());
 
-        return new VectorPair(new Vector(x,y,z), new Vector(x2,y2,z2));
+        return new VectorPair(new Vector(x, y, z), new Vector(x2, y2, z2));
     }
 
     public static void removeGlowingBounds(Player p, Sectors plugin) {
         ProtocolManager protocolManager = plugin.getProtocolManager();
         List<Integer> entityIDsForPlayer = ServiceManager.getPlayerEntityService().getEntityIDsForPlayer(p);
         if (entityIDsForPlayer.isEmpty()) return;
-
         PacketContainer destroyPacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
         destroyPacket.getIntLists().write(0, entityIDsForPlayer);
 
         protocolManager.sendServerPacket(p, destroyPacket);
 
-        // Clear the list after removal
         entityIDsForPlayer.clear();
     }
 }

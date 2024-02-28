@@ -1,6 +1,6 @@
 package me.jm3l.sectors.utilities;
 
-import me.jm3l.sectors.FileUtils.ConfigManager;
+import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.exceptions.NotInSector;
 import me.jm3l.sectors.objects.Sector;
 import me.jm3l.sectors.objects.claim.ClaimSelection;
@@ -30,7 +30,7 @@ public class PlayerData {
     /*
    Pending teleports
     */
-    private HashMap<Player, Integer> pendingTeleports;
+    private final HashMap<Player, Integer> pendingTeleports;
     public HashMap<Player, Integer> getPendingTeleports(){
         return pendingTeleports;
     }
@@ -38,7 +38,7 @@ public class PlayerData {
     /*
    Loaded sectors
     */
-    private ArrayList<Sector> sectors;
+    private final ArrayList<Sector> sectors;
     public ArrayList<Sector> getSectors(){
         return sectors;
     }

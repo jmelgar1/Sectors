@@ -1,6 +1,6 @@
 package me.jm3l.sectors.command;
 
-import me.jm3l.sectors.FileUtils.ConfigManager;
+import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.command.subcommand.ClaimCommand;
 import me.jm3l.sectors.command.subcommand.CreateCommand;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class SCommand implements CommandExecutor {
 
-    private Map<String, SubCommand> subCommands = new LinkedHashMap<>();
+    private final Map<String, SubCommand> subCommands = new LinkedHashMap<>();
 
     private void sendHelp(Player commandSender) {
         for(Map.Entry<String, SubCommand> e : subCommands.entrySet()){

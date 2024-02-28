@@ -1,6 +1,8 @@
 package me.jm3l.sectors.events;
 
-import me.jm3l.sectors.FileUtils.ConfigManager;
+import me.jm3l.sectors.command.wand.util.ClaimToolInventoryUtilities;
+import me.jm3l.sectors.command.wand.util.ClaimToolPacketUtilities;
+import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.objects.Sector;
 import org.bukkit.ChatColor;
@@ -13,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,11 +23,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Events implements Listener {
-    private Sectors plugin;
+    private final Sectors plugin;
     public Events(Sectors plugin) {this.plugin = plugin;}
-    private Map<UUID, Sector> playerCurrentSector = new HashMap<>();
+    private final Map<UUID, Sector> playerCurrentSector = new HashMap<>();
+    private final Map<UUID, ItemStack[]> savedHotbars = new HashMap<>();
+    public Map<UUID, ItemStack[]> getSavedHotbars() {return this.savedHotbars;}
+    private final Map<UUID, Integer> scrollCounts = new HashMap<>();
 
-    boolean isActionLegal(Player player, Location event){
+    private boolean isActionLegal(Player player, Location event){
         Sector playerSec = plugin.getData().getSector(player);
         for(Sector s : plugin.getData().getSectors()){
             if(!s.hasClaim()) continue;
@@ -36,7 +42,7 @@ public class Events implements Listener {
     }
 
     @EventHandler
-    public void onInteract(PlayerInteractEvent e) {
+    private void onInteract(PlayerInteractEvent e) {
         if (e.getClickedBlock() == null) return;
         Block block = e.getClickedBlock();
         Location location = block.getLocation();
@@ -53,7 +59,7 @@ public class Events implements Listener {
     }
 
     @EventHandler
-    public void onBreak(BlockBreakEvent e) {
+    private void onBreak(BlockBreakEvent e) {
         if(e.getPlayer().hasPermission("sec.admin")) return;
         if(e.isCancelled()) return;
         if(!isActionLegal(e.getPlayer(), e.getBlock().getLocation())) {
@@ -62,9 +68,17 @@ public class Events implements Listener {
         }
     }
 
+    @EventHandler
+    public void onPlayerUse(PlayerInteractEvent e) {
+        ItemStack item = e.getItem();
+
+        if (item != null && plugin.getClaimWand().isWand(item)) {
+            e.setCancelled(true);
+        }
+    }
 
     @EventHandler
-    public void onPlace(BlockPlaceEvent e) {
+    private void onPlace(BlockPlaceEvent e) {
         if(e.getPlayer().hasPermission("sec.admin")) return;
         if(e.isCancelled()) return;
         if(!isActionLegal(e.getPlayer(), e.getBlock().getLocation())) {
@@ -84,26 +98,47 @@ public class Events implements Listener {
     }
 
     @EventHandler
-    public void onLeave(PlayerQuitEvent e) {plugin.getData().removeSPlayer(e.getPlayer());}
+    public void onScroll(PlayerItemHeldEvent e) {
+        Player p = e.getPlayer();
+        UUID pUUID = p.getUniqueId();
+        int currentDistance = plugin.getClaimParticleTask().getPlayerMarkerDistances().getOrDefault(pUUID, 5);
+
+        boolean isScrollDown = (e.getNewSlot() == 0 && e.getPreviousSlot() == 8) || (e.getNewSlot() > e.getPreviousSlot() && !(e.getPreviousSlot() == 0 && e.getNewSlot() == 8));
+
+        int scrollCount = scrollCounts.getOrDefault(pUUID, 0);
+        if (isScrollDown) {scrollCount--;} else {scrollCount++;}
+        scrollCounts.put(pUUID, scrollCount);
+        currentDistance += scrollCount;
+        scrollCounts.put(pUUID, 0);
+        currentDistance = Math.max(ConfigManager.MIN_CLAIM_REACH, Math.min(currentDistance, ConfigManager.MAX_CLAIM_REACH));
+        plugin.getClaimParticleTask().getPlayerMarkerDistances().put(pUUID, currentDistance);
+    }
 
     @EventHandler
-    public void dropItem(PlayerDropItemEvent e){
+    private void onLeave(PlayerQuitEvent e) {
+        plugin.getData().removeSPlayer(e.getPlayer());
+    }
+
+    @EventHandler
+    private void onDropItem(PlayerDropItemEvent e){
+        Player p = e.getPlayer();
         if(plugin.getClaimWand().isWand(e.getItemDrop().getItemStack())){
             e.getItemDrop().remove();
+            ClaimToolPacketUtilities.clearAllPositionsAndMarkers(p, true, plugin);
+            ClaimToolInventoryUtilities.restoreHotbar(p, savedHotbars, plugin);
         }
     }
 
     @EventHandler
-    public void onMove(PlayerMoveEvent e) {
+    private void onMove(PlayerMoveEvent e) {
         if (e.getFrom().getBlock().equals(e.getTo().getBlock()))
             return;
 
-        Player player = e.getPlayer();
-        UUID playerId = player.getUniqueId();
+        Player p = e.getPlayer();
+        UUID playerId = p.getUniqueId();
         Location toLocation = e.getTo();
-        Sector newSector = null;
 
-        // Find if the player has moved into a new sector
+        Sector newSector = null;
         for (Sector s : plugin.getData().getSectors()) {
             if (s.hasClaim() && s.getClaim().containsLocation(toLocation)) {
                 newSector = s;
@@ -112,15 +147,12 @@ public class Events implements Listener {
         }
 
         Sector currentSector = playerCurrentSector.get(playerId);
-
-        // Notify the player if they have entered a new sector
         if (newSector != null && !newSector.equals(currentSector)) {
-            player.sendMessage(ChatColor.YELLOW + "You have entered the claim of " + newSector.getName() + ".");
+            p.sendPlainMessage(ChatColor.YELLOW + "You have entered the claim of " + newSector.getName() + ".");
             playerCurrentSector.put(playerId, newSector);
         }
-        // Notify the player if they have left a sector
         else if (currentSector != null && (newSector == null || !newSector.equals(currentSector))) {
-            player.sendMessage(ChatColor.YELLOW + "You have left the claim of " + currentSector.getName() + ".");
+            p.sendMessage(ChatColor.YELLOW + "You have left the claim of " + currentSector.getName() + ".");
             playerCurrentSector.remove(playerId);
         }
     }

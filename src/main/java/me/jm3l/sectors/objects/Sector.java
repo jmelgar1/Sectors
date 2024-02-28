@@ -1,6 +1,6 @@
 package me.jm3l.sectors.objects;
 
-import me.jm3l.sectors.FileUtils.ConfigManager;
+import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.objects.claim.Claim;
@@ -16,15 +16,11 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import java.util.*;
 
 public class Sector implements ConfigurationSerializable {
-    private Sectors plugin;
-
-    //Attributes
+    private final Sectors plugin;
     private final String name;
-
     public String getName() {
         return this.name;
     }
-
     private Location home;
 
     public void setHome(Player p) {
