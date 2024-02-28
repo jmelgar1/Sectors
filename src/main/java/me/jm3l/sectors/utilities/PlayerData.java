@@ -1,6 +1,6 @@
 package me.jm3l.sectors.utilities;
 
-import me.jm3l.sectors.FileUtils.ConfigManager;
+import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.exceptions.NotInSector;
 import me.jm3l.sectors.objects.Sector;
 import me.jm3l.sectors.objects.claim.ClaimSelection;

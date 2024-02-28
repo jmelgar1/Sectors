@@ -18,11 +18,11 @@ repositories {
 }
 
 dependencies {
-  // Use the paperDevBundle for PaperMC development
+  implementation("org.projectlombok:lombok:1.18.26")
+    // Use the paperDevBundle for PaperMC development
   paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
 
   // Additional dependencies
-  compileOnly(group = "com.sk89q.worldedit", name = "worldedit-bukkit", version = "7.2.19")
   compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
 }
 

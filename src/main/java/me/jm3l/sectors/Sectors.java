@@ -2,7 +2,7 @@ package me.jm3l.sectors;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import me.jm3l.sectors.FileUtils.ConfigManager;
+import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.FileUtils.SectorsFile;
 import me.jm3l.sectors.command.SCommand;
 import me.jm3l.sectors.command.wand.ClaimWand;

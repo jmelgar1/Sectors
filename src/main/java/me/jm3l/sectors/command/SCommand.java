@@ -1,6 +1,6 @@
 package me.jm3l.sectors.command;
 
-import me.jm3l.sectors.FileUtils.ConfigManager;
+import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.command.subcommand.ClaimCommand;
 import me.jm3l.sectors.command.subcommand.CreateCommand;

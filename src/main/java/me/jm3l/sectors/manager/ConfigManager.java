@@ -1,4 +1,4 @@
-package me.jm3l.sectors.FileUtils;
+package me.jm3l.sectors.manager;
 
 import org.bukkit.configuration.file.FileConfiguration;
 
