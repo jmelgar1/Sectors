@@ -23,16 +23,16 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ClaimToolEvents implements Listener {
-    private Sectors plugin;
+    private final Sectors plugin;
     public ClaimToolEvents(Sectors plugin) {
         this.plugin = plugin;
     }
-    private Map<UUID, Boolean> claimModePlayers = new HashMap<>();
+    private final Map<UUID, Boolean> claimModePlayers = new HashMap<>();
     public Map<UUID, Boolean> getClaimModePlayers(){
         return this.claimModePlayers;
     }
 
-    private Map<UUID, PacketPair> playerClaimPositions = new HashMap<>();
+    private final Map<UUID, PacketPair> playerClaimPositions = new HashMap<>();
     public Map<UUID, PacketPair> getPlayerClaimPositions() {return this.playerClaimPositions;}
 
     @EventHandler

@@ -23,9 +23,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Events implements Listener {
-    private Sectors plugin;
+    private final Sectors plugin;
     public Events(Sectors plugin) {this.plugin = plugin;}
-    private Map<UUID, Sector> playerCurrentSector = new HashMap<>();
+    private final Map<UUID, Sector> playerCurrentSector = new HashMap<>();
     private final Map<UUID, ItemStack[]> savedHotbars = new HashMap<>();
     public Map<UUID, ItemStack[]> getSavedHotbars() {return this.savedHotbars;}
     private final Map<UUID, Integer> scrollCounts = new HashMap<>();

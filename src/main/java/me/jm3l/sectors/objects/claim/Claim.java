@@ -18,10 +18,10 @@ import java.util.Map;
 import java.util.Objects;
 
 public class Claim implements ConfigurationSerializable {
-    private int x, y, z, x2, y2, z2;
-    private BoundingBox bounds;
-    private World world;
-    private Sectors plugin;
+    private final int x, y, z, x2, y2, z2;
+    private final BoundingBox bounds;
+    private final World world;
+    private final Sectors plugin;
 
     public Claim(ClaimSelection s, Sectors plugin) {
         Vector pos1 = s.pos1();

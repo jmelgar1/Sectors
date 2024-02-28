@@ -16,15 +16,11 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import java.util.*;
 
 public class Sector implements ConfigurationSerializable {
-    private Sectors plugin;
-
-    //Attributes
+    private final Sectors plugin;
     private final String name;
-
     public String getName() {
         return this.name;
     }
-
     private Location home;
 
     public void setHome(Player p) {

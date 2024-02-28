@@ -14,16 +14,16 @@ import java.util.UUID;
 
 public class ClaimParticleTask extends BukkitRunnable {
 
-    private Map<UUID, PacketContainer> playerMarkers = new HashMap<>();
+    private final Map<UUID, PacketContainer> playerMarkers = new HashMap<>();
     public Map<UUID, PacketContainer> getPlayerMarkers() {return playerMarkers;}
 
-    private Map<UUID, PacketPair> playerClaimPositions = new HashMap<>();
+    private final Map<UUID, PacketPair> playerClaimPositions = new HashMap<>();
     public Map<UUID, PacketPair> getPlayerClaimPositions() {return playerClaimPositions;}
 
-    private Map<UUID, Integer> playerMarkerDistances = new HashMap<>();
+    private final Map<UUID, Integer> playerMarkerDistances = new HashMap<>();
     public Map<UUID, Integer> getPlayerMarkerDistances() {return playerMarkerDistances;}
 
-    private Sectors plugin;
+    private final Sectors plugin;
     public ClaimParticleTask(Sectors plugin) {this.plugin = plugin;}
 
     @Override

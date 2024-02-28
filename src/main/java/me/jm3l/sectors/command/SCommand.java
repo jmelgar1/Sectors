@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class SCommand implements CommandExecutor {
 
-    private Map<String, SubCommand> subCommands = new LinkedHashMap<>();
+    private final Map<String, SubCommand> subCommands = new LinkedHashMap<>();
 
     private void sendHelp(Player commandSender) {
         for(Map.Entry<String, SubCommand> e : subCommands.entrySet()){
