@@ -29,7 +29,7 @@ public class ClaimCommand implements SubCommand {
     public void perform(Player p, String[] args, Sectors plugin) throws NotInSector {
         Sector s = plugin.getData().getSectorOrError(p);
         if (!s.getLeader().equals(p.getUniqueId())) {
-            p.sendPlainMessage(ConfigManager.MUST_BE_LEADER);
+            p.sendMessage(ConfigManager.MUST_BE_LEADER);
             return;
         }
         if (s.hasClaim()) {

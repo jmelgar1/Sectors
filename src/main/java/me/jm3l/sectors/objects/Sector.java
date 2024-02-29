@@ -5,9 +5,13 @@ import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.objects.claim.Claim;
 import me.jm3l.sectors.objects.claim.util.ClaimUtilities;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
@@ -21,25 +25,25 @@ public class Sector implements ConfigurationSerializable {
     public String getName() {
         return this.name;
     }
-    private Location home;
+    private Location compound;
 
-    public void setHome(Player p) {
+    public void setCompound(Player p) {
         if (this.claim == null) {
             p.sendMessage(ConfigManager.MUST_HAVE_CLAIM);
             return;
         }
         if (this.claim.containsLocation(p.getLocation())) {
-            this.home = p.getLocation();
+            this.compound = p.getLocation();
             p.sendMessage(ConfigManager.SUCCESS);
         } else {
-            p.sendMessage(ConfigManager.HOME_MUST_BE_IN_CLAIM);
+            p.sendMessage(ConfigManager.COMPOUND_MUST_BE_IN_CLAIM);
         }
     }
     public void tpHome(Player p) {
-        if (this.home != null) {
-            p.teleport(this.home, PlayerTeleportEvent.TeleportCause.COMMAND);
+        if (this.compound != null) {
+            p.teleport(this.compound, PlayerTeleportEvent.TeleportCause.COMMAND);
         } else {
-            p.sendMessage(ChatColor.RED + "Your sector does not have a home.");
+            p.sendMessage(ConfigManager.SECTOR_NO_COMPOUND);
         }
     }
 
@@ -109,31 +113,20 @@ public class Sector implements ConfigurationSerializable {
         return this.leader.equals(p.getUniqueId());
     }
 
-    private ChatColor color = ChatColor.WHITE;
-
-    public ChatColor getColor() {
-        return this.color;
-    }
-
-    public void setColor(ChatColor color) {
+    private TextColor color = TextColor.color(0xE0E0E0);
+    public TextColor getColor() {return this.color;}
+    public void setColor(TextColor color) {
         this.color = color;
     }
 
     private Claim claim;
-
     public Claim getClaim() {
         return this.claim;
     }
-
     public void setClaim(Claim c) {
         this.claim = c;
     }
-
-    public boolean hasClaim() {
-        if (this.claim == null) return false;
-        return true;
-    }
-
+    public boolean hasClaim() {return this.claim != null;}
 
     //Hashcode
     @Override
@@ -148,7 +141,6 @@ public class Sector implements ConfigurationSerializable {
     public int hashCode() {
         return Objects.hash(name);
     }
-
 
     //Constructor for new sector
     public Sector(final String name, final Player p, final Sectors data) {
@@ -173,8 +165,8 @@ public class Sector implements ConfigurationSerializable {
         this.description = (String) map.get("description");
         this.dtr = (int) map.get("dtr");
         if (map.get("kills") == null) this.kills = 0; else this.kills = (int) map.get("kills");
-        this.color = ChatColor.getByChar((String) map.get("color"));
-        this.home = (Location) map.get("home");
+        this.color = TextColor.fromHexString((String) map.get("color"));
+        this.compound = (Location) map.get("compound");
         if (map.get("claim") != null) this.claim = Claim.deserialize((MemorySection) map.get("claim"), data);
         else this.claim = null;
 
@@ -182,15 +174,19 @@ public class Sector implements ConfigurationSerializable {
 
 
     //Broadcast to all members
-    public void broadcast(final String s) {
-        for (UUID id : this.members) {
-            if (Bukkit.getOfflinePlayer(id).isOnline()) {
-                Player player = Bukkit.getPlayer(id);
-                player.sendMessage(s);
+    public void broadcast(final TextComponent text) {
+        if(text == null) return;
+        for (UUID pUUID : this.members) {
+            if (Bukkit.getOfflinePlayer(pUUID).isOnline()) {
+                Player p = Bukkit.getPlayer(pUUID);
+                if(p != null){p.sendMessage(text);}
             }
         }
         if (Bukkit.getOfflinePlayer(this.leader).isOnline()) {
-            Bukkit.getPlayer(this.leader).sendMessage(s);
+            Player p = Bukkit.getPlayer(this.leader);
+            if (p != null && p.isOnline()) {
+                p.sendMessage(text);
+            }
         }
     }
 
@@ -198,14 +194,22 @@ public class Sector implements ConfigurationSerializable {
     public void setLeader(final UUID id) {
         this.members.add(this.leader);
         this.leader = id;
+        Sector pSector = plugin.getData().getSector(Bukkit.getPlayer(this.leader));
+        String sectorName = pSector.getName();
         for (UUID uuid : this.members) {
             if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
                 Player p = Bukkit.getPlayer(uuid);
-                p.sendMessage(ChatColor.YELLOW + Bukkit.getOfflinePlayer(this.leader).getName() + ChatColor.YELLOW + " is now the leader of the sector!");
+                if(p != null){
+                    p.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.NEW_LEADER.replace("{player}", p.getName()).replace("{sector}", sectorName)));}
             }
         }
-        if (Bukkit.getOfflinePlayer(this.leader).isOnline())
-            Bukkit.getPlayer(this.leader).sendMessage(ChatColor.YELLOW + "You are now the leader of your sector!");
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(this.leader);
+        if (offlinePlayer.isOnline()) {
+            Player player = Bukkit.getPlayer(this.leader);
+            if (player != null) {
+                player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.YOU_ARE_LEADER.replace("{sector}", sectorName)));
+            }
+        }
     }
 
     // Sector info display.
@@ -245,19 +249,24 @@ public class Sector implements ConfigurationSerializable {
             plugin.getData().removeSPlayer(Bukkit.getPlayer(id));
         }
         plugin.getData().removeSector(this);
-        Bukkit.broadcastMessage(ChatColor.YELLOW + "Sector " + ChatColor.WHITE + this.name + ChatColor.YELLOW + " has been disbanded!");
+        Bukkit.broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.SECTOR_DISSOLVED.replace("{sector}", this.name)));
     }
 
     //Remove player from sector, whether they left or were kicked. Returns true if player was in the sector, false if player was not.
-    public boolean removePlayer(final UUID p) {
+    public boolean removePlayer(final UUID p, boolean wasKicked) {
         if (p.equals(this.leader)) {
             if (this.dtr <= 0) return false;
             this.disband();
             return true;
         }
         if (this.members.remove(p)) {
-            plugin.getData().removeSPlayer(Bukkit.getPlayer(p)); //Remove from FPlayers if online
-            this.broadcast(Bukkit.getOfflinePlayer(p).getName() + ChatColor.GOLD + " is no longer in the sector.");
+            plugin.getData().removeSPlayer(Bukkit.getPlayer(p));
+            String pName = Bukkit.getOfflinePlayer(p).getName();
+            if(wasKicked){
+                this.broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.KICKED_FROM_SECTOR.replace("{player}", pName)));
+            } else {
+                this.broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.LEAVE_SECTOR.replace("{player}", pName)));
+            }
             return true;
         }
         return false;
@@ -266,8 +275,8 @@ public class Sector implements ConfigurationSerializable {
     //Add player to sector, player must be online to join so we use Player
     public void addPlayer(final Player p) {
         this.members.add(p.getUniqueId());
-        plugin.getData().addSPlayer(p, this); //Add player to SPlayers so interactions work.
-        this.broadcast(ChatColor.YELLOW + p.getName() + " has joined the sector!");
+        plugin.getData().addSPlayer(p, this);
+        this.broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.JOIN_SECTOR.replace("{player}", p.getName())));
     }
 
 
@@ -280,12 +289,12 @@ public class Sector implements ConfigurationSerializable {
             membersStr.add(i.toString());
         }
         map.put("name", this.name);
-        map.put("color", Character.toString(this.color.getChar()));
+        map.put("color", this.color.asHexString());
         map.put("leader", this.leader.toString());
         map.put("members", membersStr);
         map.put("description", this.description);
         map.put("dtr", this.dtr);
-        map.put("home", this.home);
+        map.put("compound", this.compound);
         map.put("kills", this.kills);
         if (this.claim != null) map.put("claim", this.claim.serialize());
         else map.put("claim", null);
