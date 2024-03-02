@@ -106,8 +106,7 @@ public class PlayerData {
      */
     private HashMap<Player, Sector> invites;
     public boolean hasInvitation(Player p){
-        if(invites.containsKey(p)) return true;
-        return false;
+        return invites.containsKey(p);
     }
     public void addInvitation(Player p, Sector s) {invites.put(p, s);}
     public void expireInvitation(Player p) {invites.remove(p);}
@@ -133,8 +132,7 @@ public class PlayerData {
     public boolean hasSelection(Player p){
         if(selections.containsKey(p)){
             ClaimSelection s = selections.get(p);
-            if(s.pos1() == null || s.pos2() == null) return false;
-            return true;
+            return s.pos1() != null && s.pos2() != null;
         }
         return false;
     }

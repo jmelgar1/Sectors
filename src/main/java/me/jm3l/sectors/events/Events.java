@@ -98,6 +98,11 @@ public class Events implements Listener {
     }
 
     @EventHandler
+    private void onLeave(PlayerQuitEvent e) {
+        plugin.getData().removeSPlayer(e.getPlayer());
+    }
+
+    @EventHandler
     public void onScroll(PlayerItemHeldEvent e) {
         Player p = e.getPlayer();
         UUID pUUID = p.getUniqueId();
@@ -112,11 +117,6 @@ public class Events implements Listener {
         scrollCounts.put(pUUID, 0);
         currentDistance = Math.max(ConfigManager.MIN_CLAIM_REACH, Math.min(currentDistance, ConfigManager.MAX_CLAIM_REACH));
         plugin.getClaimParticleTask().getPlayerMarkerDistances().put(pUUID, currentDistance);
-    }
-
-    @EventHandler
-    private void onLeave(PlayerQuitEvent e) {
-        plugin.getData().removeSPlayer(e.getPlayer());
     }
 
     @EventHandler

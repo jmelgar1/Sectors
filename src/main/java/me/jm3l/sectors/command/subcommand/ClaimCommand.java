@@ -29,7 +29,7 @@ public class ClaimCommand implements SubCommand {
     public void perform(Player p, String[] args, Sectors plugin) throws NotInSector {
         Sector s = plugin.getData().getSectorOrError(p);
         if (!s.getLeader().equals(p.getUniqueId())) {
-            p.sendPlainMessage(ConfigManager.MUST_BE_LEADER);
+            p.sendMessage(ConfigManager.MUST_BE_LEADER);
             return;
         }
         if (s.hasClaim()) {
@@ -44,6 +44,7 @@ public class ClaimCommand implements SubCommand {
             final TextComponent expandReach = Component.text("- [Scroll Up] :: ").append(Component.text("Expand Reach").color(TextColor.color(0x9CCC65)));
             final TextComponent reduceReach = Component.text("- [Scroll Down] :: ").append(Component.text("Reduce Reach").color(TextColor.color(0xE57373)));
             final TextComponent setPoint = Component.text("- [Left Click] :: ").append(Component.text("Set Point").color(TextColor.color(0x1976D2)));
+            final TextComponent resetSelection = Component.text("- [").append(Component.keybind("key.swapOffhand")).append(Component.text("] :: ").append(Component.text("Reset Selection").color(TextColor.color(0xBA68C8))));
 
             final Component combinedMessage = Component.empty()
                 .append(outline)
@@ -56,10 +57,11 @@ public class ClaimCommand implements SubCommand {
                 .append(Component.newline())
                 .append(setPoint)
                 .append(Component.newline())
+                .append(resetSelection)
+                .append(Component.newline())
                 .append(outline);
 
             p.sendMessage(combinedMessage);
-            //p.sendMessage(ConfigManager.TRIED_CLAIM_NO_SELECTION);
             ClaimToolInventoryUtilities.fillHotbarWithWand(p, plugin.getEvents().getSavedHotbars(), plugin);
             return;
         }

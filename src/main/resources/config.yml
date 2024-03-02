@@ -68,26 +68,42 @@ no-sector-formatted-chat: "{name} > {message}"
 mob-spawn-in-claims: false
 
 # Configurable Messages Below
+# Errors / Red Messages
 no-permission: "&cNo permission."
-msg-success: "&eSuccess!"
+missing-argument: "&cMissing argument"
 msg-must-be-in-sector: "&cYou must be in a sector to do that!"
 msg-must-be-leader: "&cYou must be the leader to do that!"
 msg-player-not-found: "&cPlayer not found."
 not-a-player-or-sector: "&cNo sector found by that name/player."
 msg-no-invite: "&cYou do not have any invitations or the sector you are trying to join is full."
-already-has-claim: "&cYour sector already has a claim!"
+
+# Directly sector related
+already-has-claim: "&cYour sector already has a claim territory!"
+sector-unclaim: "&cYour sector's territory has been unclaimed!"
+sector-no-claim: "&cYour sector does not have an existing claim!"
+sector-no-compound: "&cYour sector does not have a compound!"
+sector-dissolved: "&cSector &4{sector} &chas been dissolved!"
+kicked-from-sector: "&c{player} &4has been kicked from the sector!"
+leave-sector: "&c{player} &4has left the sector!"
+
+# Success / Green
+msg-success: "&eSuccess!"
+new-leader: "&a{player} &2is now the leader of &a{sector}!"
+you-are-leader: "&2You are now the leader of &a{sector}!"
+joined-sector: "&a{player} &2has joined the sector!"
+
 tried-claim-no-selection: "&cYou must make a selection with /pos1 & /pos2, or use this claiming wand!"
 claim-too-big: "&cClaim too big."
 claim-too-small-or-narrow: "&cClaim too small or narrow"
 land-already-claimed: "&cLand is already claimed."
 must-have-claim: "&cYou need to have a claim!"
-home-must-be-in-claim: "&cYour home must be inside your claim!"
+compound-must-be-in-claim: "&cYour compound must be inside your claim!"
 already-in-sector: "&cYou are already in a sector!"
 name-too-long: "&sector name is too long!"
 name-taken: "&cThat name is already taken!"
 invalid-name: "&cTry another name with A-Z only!"
-sector-founded: "&sector &f{sector} &ehas been founded!" #Use {sector} to get the name of the founded sector
-teleport-pending: "&eTeleporting to sector home in &f{seconds} &eseconds. Do not engage in PvP combat."
+sector-founded: "&eSector &f{sector} &ehas been founded!"
+teleport-pending: "&eTeleporting to sector compound in &f{seconds} &eseconds. Do not engage in PvP combat."
 archer-tagged: "&cYou have been archer tagged!"
 
 # PlaceholderAPI Settings
