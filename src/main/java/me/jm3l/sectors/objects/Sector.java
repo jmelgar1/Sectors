@@ -5,11 +5,11 @@ import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.objects.claim.Claim;
 import me.jm3l.sectors.objects.claim.util.ClaimUtilities;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.MemorySection;
@@ -47,7 +47,7 @@ public class Sector implements ConfigurationSerializable {
         }
     }
 
-    private String description;
+    private String description = "Set description";
 
     public void setDescription(String s) {
         this.description = s;
@@ -212,33 +212,53 @@ public class Sector implements ConfigurationSerializable {
         }
     }
 
-    // Sector info display.
     public void showInfo(final Player p) {
-        p.sendMessage(ChatColor.YELLOW + "----==== Sector Info: " + this.color + this.name + ChatColor.YELLOW + " ====----");
-        p.sendMessage(ChatColor.YELLOW + "Kills: " + ChatColor.WHITE + this.kills);
-        p.sendMessage(ChatColor.YELLOW + "Description: " + ChatColor.WHITE + this.description);
-        if (ConfigManager.ENABLE_RAIDING)
-            p.sendMessage(ChatColor.YELLOW + "DTR: " + ChatColor.WHITE + this.dtr + (this.dtr <= 0 ? ChatColor.RED + "| RAIDABLE" : ""));
-        p.sendMessage(ChatColor.YELLOW + "Leader: " + ChatColor.WHITE + (Bukkit.getOfflinePlayer(this.leader).isOnline() ? Bukkit.getPlayer(this.leader).getName() : Bukkit.getOfflinePlayer(this.leader).getName()));
-        p.sendMessage(ChatColor.YELLOW + "Members:" + ChatColor.WHITE);
-        for (UUID id : this.members) {
-            String name;
-            if (Bukkit.getOfflinePlayer(id).isOnline()) {
-                name = ChatColor.GREEN + Bukkit.getPlayer(id).getName();
-            } else {
-                name = ChatColor.RED + Bukkit.getOfflinePlayer(id).getName();
-            }
-            p.sendMessage(name);
+        sendMessageWithHeader(p, "┌──────[ ", this.name, " ]───────◓");
+        sendInfoMessage(p, "Description: ", this.description, descriptionColor);
+        sendInfoMessage(p, "Kills: ", String.valueOf(this.kills), killsColor);
+        sendInfoMessage(p, "DTR: ", String.valueOf(this.dtr), dtrColor);
+
+        String leaderName = getOnlinePlayerName(this.leader);
+        if (leaderName != null) {
+            sendInfoMessage(p, "Leader: ", leaderName, leaderColor);
         }
-        if (!ConfigManager.SHOW_COORDS_IN_INFO) return;
+
+        sendInfoMessage(p, "Members: ", "", infoColor);
+        for (UUID id : this.members) {
+            sendInfoMessage(p, "", getOnlinePlayerName(id), membersColor);
+        }
+
         if (this.hasClaim()) {
-            p.sendMessage(ChatColor.GREEN + "Claim start: " + this.claim.start() +
-                    "\n" + "Claim end: " + this.claim.end());
+            sendInfoMessage(p, "Claim start: ", String.valueOf(this.claim.start()), claimColor);
+            sendInfoMessage(p, "Claim end: ", String.valueOf(this.claim.end()), claimColor);
             if (this.claim.getBounds().contains(p.getLocation().toVector())) {
                 ClaimUtilities.showGlowingBounds(this.claim.getEdgeLocations(), p, plugin, ServiceManager.getPlayerEntityService());
             }
         } else {
-            p.sendMessage(ChatColor.YELLOW + "This sector does not have a claim.");
+            sendInfoMessage(p, "Claim: ", "This sector does not have a claim.", noClaimColor);
+        }
+
+        p.sendMessage(Component.text("└───────────────────◒").color(headerColor));
+    }
+
+    private void sendInfoMessage(Player p, String prefix, String text, TextColor color) {
+        p.sendMessage(Component.text("│ ").color(headerColor)
+            .append(Component.text(prefix).color(infoColor))
+            .append(Component.text(text).color(color)));
+    }
+
+    private void sendMessageWithHeader(Player p, String prefix, String headerText, String suffix) {
+        p.sendMessage(Component.text(prefix).color(headerColor)
+            .append(Component.text(headerText).color(defaultTextColor))
+            .append(Component.text(suffix).color(headerColor)));
+    }
+
+    private String getOnlinePlayerName(UUID playerId) {
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerId);
+        if (offlinePlayer.isOnline() && offlinePlayer.getPlayer() != null) {
+            return offlinePlayer.getPlayer().getName();
+        } else {
+            return offlinePlayer.getName();
         }
     }
 
@@ -304,4 +324,16 @@ public class Sector implements ConfigurationSerializable {
     public static Sector deserialize(Map<String, Object> map, Sectors data) {
         return new Sector(map, data);
     }
+
+
+    private final TextColor headerColor = TextColor.color(0xEF9A9A);
+    private final TextColor infoColor = TextColor.color(0xFFF9C4);
+    private final TextColor defaultTextColor = TextColor.color(0xEEEEEE);
+    private final TextColor descriptionColor = TextColor.color(0xE0E0E0);
+    private final TextColor killsColor = TextColor.color(0xFFA726);
+    private final TextColor dtrColor = TextColor.color(0xE57373);
+    private final TextColor leaderColor = TextColor.color(0xCE93D8);
+    private final TextColor membersColor = TextColor.color(0x2E7D32);
+    private final TextColor claimColor = TextColor.color(0x7CB342);
+    private final TextColor noClaimColor = TextColor.color(0xD32F2F);
 }

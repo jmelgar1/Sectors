@@ -61,7 +61,7 @@ public class ConfigManager {
         SECTOR_DISSOLVED = translateAlternateColorCodes('&', config.getString("sector-dissolved"));
         KICKED_FROM_SECTOR = translateAlternateColorCodes('&', config.getString("kicked-from-sector"));
         LEAVE_SECTOR = translateAlternateColorCodes('&', config.getString("leave-sector"));
-        JOIN_SECTOR = translateAlternateColorCodes('&', config.getString("join-sector"));
+        JOIN_SECTOR = translateAlternateColorCodes('&', config.getString("joined-sector"));
         TELEPORT_PENDING = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("teleport-pending").replaceAll("\\{seconds}", Long.toString((TELEPORT_DELAY/20)))));
         NOT_A_PLAYER_OR_SECTOR = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("not-a-player-or-sector")));
         ARCHER_TAGGED = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("archer-tagged")));
