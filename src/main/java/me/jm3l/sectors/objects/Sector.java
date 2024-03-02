@@ -47,7 +47,7 @@ public class Sector implements ConfigurationSerializable {
         }
     }
 
-    private String description = "Set description";
+    private String description;
 
     public void setDescription(String s) {
         this.description = s;
@@ -214,6 +214,9 @@ public class Sector implements ConfigurationSerializable {
 
     public void showInfo(final Player p) {
         sendMessageWithHeader(p, "┌──────[ ", this.name, " ]───────◓");
+        if(this.description == null) {
+            this.description = "Set Description";
+        }
         sendInfoMessage(p, "Description: ", this.description, descriptionColor);
         sendInfoMessage(p, "Kills: ", String.valueOf(this.kills), killsColor);
         sendInfoMessage(p, "DTR: ", String.valueOf(this.dtr), dtrColor);

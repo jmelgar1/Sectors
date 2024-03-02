@@ -39,8 +39,7 @@ public class SectorsFile {
     }
 
     public void saveSectors(){
-
-        //Keep track of sectors saved so we can delete any sectors from the file that weren't saved (meaning they were deleted).
+        System.out.println("Saving Sectors");
         List<String> savedSecs = new ArrayList<>();
 
         for(Sector s : plugin.getData().getSectors()){
@@ -53,7 +52,6 @@ public class SectorsFile {
             e.printStackTrace();
         }
 
-        //Delete any disbanded sectors
         for(String key : sectorsData.getKeys(false)){
             if(!savedSecs.contains(key)){
                 sectorsData.set(key, null);

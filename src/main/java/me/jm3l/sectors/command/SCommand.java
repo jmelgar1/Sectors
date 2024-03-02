@@ -1,11 +1,8 @@
 package me.jm3l.sectors.command;
 
+import me.jm3l.sectors.command.subcommand.*;
 import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.Sectors;
-import me.jm3l.sectors.command.subcommand.ClaimCommand;
-import me.jm3l.sectors.command.subcommand.CreateCommand;
-import me.jm3l.sectors.command.subcommand.InfoCommand;
-import me.jm3l.sectors.command.subcommand.UnclaimCommand;
 import me.jm3l.sectors.exceptions.NotInSector;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -37,6 +34,7 @@ public class SCommand implements CommandExecutor {
         subCommands.put("claim", new ClaimCommand());
         subCommands.put("info", new InfoCommand());
         subCommands.put("unclaim", new UnclaimCommand());
+        subCommands.put("reload", new ReloadCommand());
         //subCommandMap.put("desc", new DescCommand());
         //subCommandMap.put("invite", new InviteCommand());
         //subCommandMap.put("accept", new AcceptCommand());
@@ -49,7 +47,6 @@ public class SCommand implements CommandExecutor {
         //subCommandMap.put("sethome", new SetHomeCommand());
         //subCommandMap.put("home", new HomeCommand());
         //subCommandMap.put("notify", new NotifyCommand());
-        //subCommandMap.put("reload", new ReloadCommand());
         //subCommandMap.put("version", new VersionCommand());
         //subCommandMap.put("setdtr", new SetDTRCommand());
     }

@@ -21,7 +21,6 @@ public class InfoCommand implements SubCommand {
 
     @Override
     public void perform(Player player, String[] args, Sectors plugin) throws NotInSector {
-        // case when /s info is done with no arguments
         if (args.length == 0) {
             Sector s = plugin.getData().getSectorOrError(player);
             s.showInfo(player);
