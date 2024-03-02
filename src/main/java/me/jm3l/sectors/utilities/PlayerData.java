@@ -4,6 +4,8 @@ import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.exceptions.NotInSector;
 import me.jm3l.sectors.objects.Sector;
 import me.jm3l.sectors.objects.claim.ClaimSelection;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -109,12 +111,20 @@ public class PlayerData {
         return invites.containsKey(p);
     }
     public void addInvitation(Player p, Sector s) {invites.put(p, s);}
-    public void expireInvitation(Player p) {invites.remove(p);}
-    public boolean acceptInvite(Player p){
+    public void expireInvitation(Player p) {
+        p.sendMessage(Component.text("Sector invite expired!").color(TextColor.color(0xF44336)));
+        invites.remove(p);
+    }
+    public boolean acceptInvite(Player p, Sector s){
         if(invites.containsKey(p)){
-            if(invites.get(p).getMembers().size() >= ConfigManager.MAX_MEMBERS) return false;
-            invites.get(p).addPlayer(p);
-            return true;
+            Sector sector = invites.get(p);
+            if(sector.equals(s)) {
+                if (invites.get(p).getMembers().size() >= ConfigManager.MAX_MEMBERS) return false;
+                sector.addPlayer(p);
+                return true;
+            } else {
+                p.sendMessage(Component.text("You do not have an invite from this sector!"));
+            }
         }
         return false;
     }

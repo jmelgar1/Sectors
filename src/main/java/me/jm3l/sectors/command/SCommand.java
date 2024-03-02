@@ -35,12 +35,12 @@ public class SCommand implements CommandExecutor {
         subCommands.put("info", new InfoCommand());
         subCommands.put("unclaim", new UnclaimCommand());
         subCommands.put("reload", new ReloadCommand());
+        subCommands.put("setleader", new SetleaderCommand());
+        subCommands.put("leave", new LeaveCommand());
+        subCommands.put("invite", new InviteCommand());
+        subCommands.put("accept", new AcceptCommand());
         //subCommandMap.put("desc", new DescCommand());
-        //subCommandMap.put("invite", new InviteCommand());
-        //subCommandMap.put("accept", new AcceptCommand());
         //subCommandMap.put("kick", new KickCommand());
-        //subCommandMap.put("setleader", new SetleaderCommand());
-        //subCommandMap.put("leave", new LeaveCommand());
         //subCommandMap.put("who", info);
         //subCommandMap.put("setcolor", new SetColorCommand());
         //subCommandMap.put("list", new ListCommand());
