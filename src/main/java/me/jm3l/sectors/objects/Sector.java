@@ -215,7 +215,7 @@ public class Sector implements ConfigurationSerializable {
     public void showInfo(final Player p) {
         sendMessageWithHeader(p, "┌──────[ ", this.name, " ]───────◓");
         if(this.description == null) {
-            this.description = "Set Description";
+            this.description = "No description set";
         }
         sendInfoMessage(p, "Description: ", this.description, descriptionColor);
         sendInfoMessage(p, "Kills: ", String.valueOf(this.kills), killsColor);
@@ -226,10 +226,17 @@ public class Sector implements ConfigurationSerializable {
             sendInfoMessage(p, "Leader: ", leaderName, leaderColor);
         }
 
-        sendInfoMessage(p, "Members: ", "", infoColor);
+        StringBuilder membersList = new StringBuilder();
         for (UUID id : this.members) {
-            sendInfoMessage(p, "", getOnlinePlayerName(id), membersColor);
+            String playerName = getOnlinePlayerName(id);
+            if(playerName != null) {
+                if(membersList.length() > 0){
+                    membersList.append(", ");
+                }
+                membersList.append(playerName);
+            }
         }
+        sendInfoMessage(p, "Members: ", membersList.toString(), membersColor);
 
         if (this.hasClaim()) {
             sendInfoMessage(p, "Claim start: ", String.valueOf(this.claim.start()), claimColor);

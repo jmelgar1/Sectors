@@ -6,15 +6,15 @@ import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.objects.Sector;
 import org.bukkit.entity.Player;
 
-public class AcceptCommand implements SubCommand {
+public class DeclineCommand implements SubCommand {
     @Override
     public String getPermission() {
-        return "sec.player.accept";
+        return "sec.player.decline";
     }
 
     @Override
     public String getDescription() {
-        return "Accept an invitation to a sector";
+        return "Decline an invitation to a sector";
     }
 
     @Override
@@ -26,7 +26,7 @@ public class AcceptCommand implements SubCommand {
 
         Sector target = plugin.getData().getSector(args[0]);
         if (target != null) {
-            if(plugin.getData().handleInvite(p, target, true)){
+            if(plugin.getData().handleInvite(p, target, false)){
                 p.sendMessage(ConfigManager.SUCCESS);
             } else {
                 p.sendMessage(ConfigManager.NO_INVITE);

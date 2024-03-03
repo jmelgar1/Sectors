@@ -39,7 +39,8 @@ public class SCommand implements CommandExecutor {
         subCommands.put("leave", new LeaveCommand());
         subCommands.put("invite", new InviteCommand());
         subCommands.put("accept", new AcceptCommand());
-        //subCommandMap.put("desc", new DescCommand());
+        subCommands.put("decline", new DeclineCommand());
+        subCommands.put("desc", new DescCommand());
         //subCommandMap.put("kick", new KickCommand());
         //subCommandMap.put("who", info);
         //subCommandMap.put("setcolor", new SetColorCommand());

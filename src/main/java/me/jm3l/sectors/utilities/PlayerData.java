@@ -115,15 +115,19 @@ public class PlayerData {
         p.sendMessage(Component.text("Sector invite expired!").color(TextColor.color(0xF44336)));
         invites.remove(p);
     }
-    public boolean acceptInvite(Player p, Sector s){
-        if(invites.containsKey(p)){
+
+    public boolean handleInvite(Player p, Sector s, boolean accept) {
+        if (invites.containsKey(p)) {
             Sector sector = invites.get(p);
-            if(sector.equals(s)) {
-                if (invites.get(p).getMembers().size() >= ConfigManager.MAX_MEMBERS) return false;
-                sector.addPlayer(p);
+            if (sector.equals(s)) {
+                if (accept) {
+                    if (sector.getMembers().size() >= ConfigManager.MAX_MEMBERS) {return false;}
+                    sector.addPlayer(p);
+                }
+                invites.remove(p);
                 return true;
             } else {
-                p.sendMessage(Component.text("You do not have an invite from this sector!"));
+                p.sendMessage(Component.text("You do not have an invitation from this sector!"));
             }
         }
         return false;

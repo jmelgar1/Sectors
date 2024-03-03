@@ -40,7 +40,7 @@ public class InviteCommand implements SubCommand {
             return;
         }
         if (plugin.getData().isPlayerInSector(target)) {
-            p.sendMessage(Component.text("Player is already in a faction"));
+            p.sendMessage(Component.text("Player is already in a sector"));
             return;
         }
         if (plugin.getData().hasInvitation(p)) {
@@ -76,6 +76,6 @@ public class InviteCommand implements SubCommand {
             public void run() {
                 plugin.getData().expireInvitation(target);
             }
-        }.runTaskLaterAsynchronously(plugin, 600);
+        }.runTaskLaterAsynchronously(plugin, 1200);
     }
 }

@@ -24,8 +24,6 @@ public class NmsRegistry {
             findBlockClass();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-            // Handle the error or rethrow as a RuntimeException
-            // For example: throw new RuntimeException("Failed to find the Block class", e);
         }
     }
 

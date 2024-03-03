@@ -33,7 +33,7 @@ public class SetleaderCommand implements SubCommand {
             return;
         }
         if (!s.getMembers().contains(target.getUniqueId())) {
-            player.sendMessage(Component.text("Player is not in your faction"));
+            player.sendMessage(Component.text("Player is not in your sector"));
             return;
         }
         s.setLeader(target.getUniqueId());
