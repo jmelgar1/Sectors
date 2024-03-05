@@ -25,25 +25,25 @@ public class Sector implements ConfigurationSerializable {
     public String getName() {
         return this.name;
     }
-    private Location compound;
+    private Location home;
 
-    public void setCompound(Player p) {
+    public void setHome(Player p) {
         if (this.claim == null) {
             p.sendMessage(ConfigManager.MUST_HAVE_CLAIM);
             return;
         }
         if (this.claim.containsLocation(p.getLocation())) {
-            this.compound = p.getLocation();
+            this.home = p.getLocation();
             p.sendMessage(ConfigManager.SUCCESS);
         } else {
-            p.sendMessage(ConfigManager.COMPOUND_MUST_BE_IN_CLAIM);
+            p.sendMessage(ConfigManager.HOME_MUST_BE_IN_CLAIM);
         }
     }
     public void tpHome(Player p) {
-        if (this.compound != null) {
-            p.teleport(this.compound, PlayerTeleportEvent.TeleportCause.COMMAND);
+        if (this.home != null) {
+            p.teleport(this.home, PlayerTeleportEvent.TeleportCause.COMMAND);
         } else {
-            p.sendMessage(ConfigManager.SECTOR_NO_COMPOUND);
+            p.sendMessage(ConfigManager.SECTOR_NO_HOME);
         }
     }
 
@@ -166,7 +166,7 @@ public class Sector implements ConfigurationSerializable {
         this.dtr = (int) map.get("dtr");
         if (map.get("kills") == null) this.kills = 0; else this.kills = (int) map.get("kills");
         this.color = TextColor.fromHexString((String) map.get("color"));
-        this.compound = (Location) map.get("compound");
+        this.home = (Location) map.get("home");
         if (map.get("claim") != null) this.claim = Claim.deserialize((MemorySection) map.get("claim"), data);
         else this.claim = null;
 
@@ -215,7 +215,7 @@ public class Sector implements ConfigurationSerializable {
     public void showInfo(final Player p) {
         sendMessageWithHeader(p, "┌──────[ ", this.name, " ]───────◓");
         if(this.description == null) {
-            this.description = "Set Description";
+            this.description = "No description set";
         }
         sendInfoMessage(p, "Description: ", this.description, descriptionColor);
         sendInfoMessage(p, "Kills: ", String.valueOf(this.kills), killsColor);
@@ -226,10 +226,17 @@ public class Sector implements ConfigurationSerializable {
             sendInfoMessage(p, "Leader: ", leaderName, leaderColor);
         }
 
-        sendInfoMessage(p, "Members: ", "", infoColor);
+        StringBuilder membersList = new StringBuilder();
         for (UUID id : this.members) {
-            sendInfoMessage(p, "", getOnlinePlayerName(id), membersColor);
+            String playerName = getOnlinePlayerName(id);
+            if(playerName != null) {
+                if(membersList.length() > 0){
+                    membersList.append(", ");
+                }
+                membersList.append(playerName);
+            }
         }
+        sendInfoMessage(p, "Members: ", membersList.toString(), membersColor);
 
         if (this.hasClaim()) {
             sendInfoMessage(p, "Claim start: ", String.valueOf(this.claim.start()), claimColor);
@@ -317,7 +324,7 @@ public class Sector implements ConfigurationSerializable {
         map.put("members", membersStr);
         map.put("description", this.description);
         map.put("dtr", this.dtr);
-        map.put("compound", this.compound);
+        map.put("home", this.home);
         map.put("kills", this.kills);
         if (this.claim != null) map.put("claim", this.claim.serialize());
         else map.put("claim", null);

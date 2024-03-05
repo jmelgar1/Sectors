@@ -38,7 +38,7 @@ public class ConfigManager {
         MISSING_ARGUMENT = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("missing-argument")));
         SECTOR_UNCLAIM = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("sector-unclaim")));
         SECTOR_NO_CLAIM = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("sector-no-claim")));
-        SECTOR_NO_COMPOUND = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("sector-no-compound")));
+        SECTOR_NO_HOME = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("sector-no-home")));
         NOT_IN_SECTOR = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("msg-must-be-in-sector")));
         SUCCESS = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("msg-success")));
         MUST_BE_LEADER = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("msg-must-be-leader")));
@@ -50,7 +50,7 @@ public class ConfigManager {
         CLAIM_TOO_NARROW = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("claim-too-small-or-narrow")));
         LAND_ALREADY_CLAIMED = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("land-already-claimed")));
         MUST_HAVE_CLAIM = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("must-have-claim")));
-        COMPOUND_MUST_BE_IN_CLAIM = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("compound-must-be-in-claim")));
+        HOME_MUST_BE_IN_CLAIM = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("home-must-be-in-claim")));
         ALREADY_IN_SECTOR = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("already-in-sector")));
         NAME_TOO_LONG = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("name-too-long")));
         NAME_TAKEN = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("name-taken")));
@@ -106,7 +106,7 @@ public class ConfigManager {
     public static TextComponent NO_PERMISSION;
     public static TextComponent MISSING_ARGUMENT;
     public static TextComponent SECTOR_NO_CLAIM;
-    public static TextComponent SECTOR_NO_COMPOUND;
+    public static TextComponent SECTOR_NO_HOME;
     public static TextComponent SECTOR_UNCLAIM;
     public static TextComponent FORMATTED_CHAT;
     public static TextComponent NO_SECTOR_FORMATTED_CHAT;
@@ -122,7 +122,7 @@ public class ConfigManager {
     public static TextComponent CLAIM_TOO_NARROW;
     public static TextComponent LAND_ALREADY_CLAIMED;
     public static TextComponent MUST_HAVE_CLAIM;
-    public static TextComponent COMPOUND_MUST_BE_IN_CLAIM;
+    public static TextComponent HOME_MUST_BE_IN_CLAIM;
     public static TextComponent ALREADY_IN_SECTOR;
     public static TextComponent NAME_TOO_LONG;
     public static TextComponent NAME_TAKEN;

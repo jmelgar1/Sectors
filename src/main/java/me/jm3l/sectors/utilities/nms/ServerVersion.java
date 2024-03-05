@@ -10,8 +10,6 @@ public class ServerVersion {
      */
     public static String getServerVersion() {
         String packageName = Bukkit.getServer().getClass().getPackage().getName();
-        // This will typically return something like "org.bukkit.craftbukkit.v1_XX_RX"
-        // This strips to just the "v1_XX_RX" part which indicates the version
         return packageName.substring(packageName.lastIndexOf('.') + 1);
     }
 
