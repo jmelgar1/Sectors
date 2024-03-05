@@ -41,12 +41,11 @@ public class SCommand implements CommandExecutor {
         subCommands.put("accept", new AcceptCommand());
         subCommands.put("decline", new DeclineCommand());
         subCommands.put("desc", new DescCommand());
+        subCommands.put("sethome", new SethomeCommand());
+        subCommands.put("home", new HomeCommand());
         //subCommandMap.put("kick", new KickCommand());
         //subCommandMap.put("who", info);
-        //subCommandMap.put("setcolor", new SetColorCommand());
         //subCommandMap.put("list", new ListCommand());
-        //subCommandMap.put("sethome", new SetHomeCommand());
-        //subCommandMap.put("home", new HomeCommand());
         //subCommandMap.put("notify", new NotifyCommand());
         //subCommandMap.put("version", new VersionCommand());
         //subCommandMap.put("setdtr", new SetDTRCommand());

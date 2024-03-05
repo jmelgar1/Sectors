@@ -25,25 +25,25 @@ public class Sector implements ConfigurationSerializable {
     public String getName() {
         return this.name;
     }
-    private Location compound;
+    private Location home;
 
-    public void setCompound(Player p) {
+    public void setHome(Player p) {
         if (this.claim == null) {
             p.sendMessage(ConfigManager.MUST_HAVE_CLAIM);
             return;
         }
         if (this.claim.containsLocation(p.getLocation())) {
-            this.compound = p.getLocation();
+            this.home = p.getLocation();
             p.sendMessage(ConfigManager.SUCCESS);
         } else {
-            p.sendMessage(ConfigManager.COMPOUND_MUST_BE_IN_CLAIM);
+            p.sendMessage(ConfigManager.HOME_MUST_BE_IN_CLAIM);
         }
     }
     public void tpHome(Player p) {
-        if (this.compound != null) {
-            p.teleport(this.compound, PlayerTeleportEvent.TeleportCause.COMMAND);
+        if (this.home != null) {
+            p.teleport(this.home, PlayerTeleportEvent.TeleportCause.COMMAND);
         } else {
-            p.sendMessage(ConfigManager.SECTOR_NO_COMPOUND);
+            p.sendMessage(ConfigManager.SECTOR_NO_HOME);
         }
     }
 
@@ -166,7 +166,7 @@ public class Sector implements ConfigurationSerializable {
         this.dtr = (int) map.get("dtr");
         if (map.get("kills") == null) this.kills = 0; else this.kills = (int) map.get("kills");
         this.color = TextColor.fromHexString((String) map.get("color"));
-        this.compound = (Location) map.get("compound");
+        this.home = (Location) map.get("home");
         if (map.get("claim") != null) this.claim = Claim.deserialize((MemorySection) map.get("claim"), data);
         else this.claim = null;
 
@@ -324,7 +324,7 @@ public class Sector implements ConfigurationSerializable {
         map.put("members", membersStr);
         map.put("description", this.description);
         map.put("dtr", this.dtr);
-        map.put("compound", this.compound);
+        map.put("home", this.home);
         map.put("kills", this.kills);
         if (this.claim != null) map.put("claim", this.claim.serialize());
         else map.put("claim", null);
