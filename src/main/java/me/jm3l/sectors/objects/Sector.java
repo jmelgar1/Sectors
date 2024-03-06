@@ -5,6 +5,7 @@ import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.objects.claim.Claim;
 import me.jm3l.sectors.objects.claim.util.ClaimUtilities;
+import me.jm3l.sectors.utilities.text.MessageUtilities;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
@@ -200,14 +201,15 @@ public class Sector implements ConfigurationSerializable {
             if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
                 Player p = Bukkit.getPlayer(uuid);
                 if(p != null){
-                    p.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.NEW_LEADER.replace("{player}", p.getName()).replace("{sector}", sectorName)));}
+                    p.sendMessage(MessageUtilities.createCrownIcon(TextColor.color(56, 142, 60)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.NEW_LEADER.replace("{player}", p.getName()).replace("{sector}", sectorName))));
+                }
             }
         }
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(this.leader);
         if (offlinePlayer.isOnline()) {
-            Player player = Bukkit.getPlayer(this.leader);
-            if (player != null) {
-                player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.YOU_ARE_LEADER.replace("{sector}", sectorName)));
+            Player leader = Bukkit.getPlayer(this.leader);
+            if (leader != null) {
+                leader.sendMessage(MessageUtilities.createCrownIcon(TextColor.color(56, 142, 60)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.YOU_ARE_LEADER.replace("{sector}", sectorName))));
             }
         }
     }
@@ -279,7 +281,11 @@ public class Sector implements ConfigurationSerializable {
             plugin.getData().removeSPlayer(Bukkit.getPlayer(id));
         }
         plugin.getData().removeSector(this);
-        Bukkit.broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.SECTOR_DISSOLVED.replace("{sector}", this.name)));
+        Bukkit.broadcast(MessageUtilities.createSectorIcon(
+            TextColor.color(211,47,47))
+                .append(LegacyComponentSerializer.legacyAmpersand()
+                .deserialize(ConfigManager.SECTOR_DISSOLVED
+                .replace("{sector}", this.name))));
     }
 
     //Remove player from sector, whether they left or were kicked. Returns true if player was in the sector, false if player was not.
@@ -293,9 +299,9 @@ public class Sector implements ConfigurationSerializable {
             plugin.getData().removeSPlayer(Bukkit.getPlayer(p));
             String pName = Bukkit.getOfflinePlayer(p).getName();
             if(wasKicked){
-                this.broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.KICKED_FROM_SECTOR.replace("{player}", pName)));
+                this.broadcast(MessageUtilities.createKickIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.KICKED_FROM_SECTOR.replace("{player}", pName))));
             } else {
-                this.broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.LEAVE_SECTOR.replace("{player}", pName)));
+                this.broadcast(MessageUtilities.createLeaveIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.LEAVE_SECTOR.replace("{player}", pName))));
             }
             return true;
         }
@@ -306,7 +312,7 @@ public class Sector implements ConfigurationSerializable {
     public void addPlayer(final Player p) {
         this.members.add(p.getUniqueId());
         plugin.getData().addSPlayer(p, this);
-        this.broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.JOIN_SECTOR.replace("{player}", p.getName())));
+        this.broadcast(MessageUtilities.createJoinIcon(TextColor.color(46,125,50)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.JOIN_SECTOR.replace("{player}", p.getName()))));
     }
 
 

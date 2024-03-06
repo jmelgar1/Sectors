@@ -11,7 +11,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class HomeCommand implements SubCommand {
     @Override
     public String getPermission() {
-        return "hcf.player.home";
+        return "sec.player.home";
     }
 
     @Override

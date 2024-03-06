@@ -75,14 +75,15 @@ msg-must-be-in-sector: "&cYou must be in a sector to do that!"
 msg-must-be-leader: "&cYou must be the leader to do that!"
 msg-player-not-found: "&cPlayer not found."
 not-a-player-or-sector: "&cNo sector found by that name/player."
+cant-kick-yourself: "&cYou can't kick yourself. Try leaving instead."
 msg-no-invite: "&cYou do not have any invitations or the sector you are trying to join is full."
 
 # Directly sector related
 already-has-claim: "&cYour sector already has a claim territory!"
-sector-unclaim: "&cYour sector's territory has been unclaimed!"
+sector-unclaim: "&eYour sector's territory has been unclaimed!"
 sector-no-claim: "&cYour sector does not have an existing claim!"
 sector-no-home: "&cYour sector does not have a home set!"
-sector-dissolved: "&cSector &4{sector} &chas been dissolved!"
+sector-dissolved: "&cSector &4{sector} &chas been dissolved..."
 kicked-from-sector: "&c{player} &4has been kicked from the sector!"
 leave-sector: "&c{player} &4has left the sector!"
 
@@ -102,8 +103,8 @@ already-in-sector: "&cYou are already in a sector!"
 name-too-long: "&sector name is too long!"
 name-taken: "&cThat name is already taken!"
 invalid-name: "&cTry another name with A-Z only!"
-sector-founded: "&eSector &f{sector} &ehas been founded!"
-teleport-pending: "&eTeleporting to sector home in &f{seconds} &eseconds. Do not engage in PvP combat."
+sector-founded: "&6Sector &f{sector} &6has been founded!"
+teleport-pending: "&dTeleporting to sector home in &f{seconds} &dseconds. Do not engage in PvP combat."
 archer-tagged: "&cYou have been archer tagged!"
 
 # PlaceholderAPI Settings

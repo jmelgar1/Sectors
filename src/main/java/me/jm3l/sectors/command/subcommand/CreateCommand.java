@@ -5,6 +5,8 @@ import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.command.SubCommand;
 import me.jm3l.sectors.objects.Sector;
 import me.jm3l.sectors.utilities.PlayerData;
+import me.jm3l.sectors.utilities.text.MessageUtilities;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -31,7 +33,7 @@ public class CreateCommand implements SubCommand {
             return;
         }
         if (args.length == 0) {
-            p.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize("&cMissing argument"));
+            p.sendMessage(ConfigManager.MISSING_ARGUMENT);
             return;
         }
         if (args[0].length() > ConfigManager.MAX_SECTOR_NAME) {
@@ -47,7 +49,11 @@ public class CreateCommand implements SubCommand {
         if (!hasBadChar) {
             Sector newSec = new Sector(args[0], p, plugin);
             data.addSector(newSec);
-            Bukkit.broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize((ConfigManager.SECTOR_FOUNDED.replaceAll("\\{sector}", args[0]))));
+            Bukkit.broadcast(MessageUtilities.createSectorIcon(
+                TextColor.color(255,111,0))
+                .append(LegacyComponentSerializer.legacyAmpersand()
+                .deserialize((ConfigManager.SECTOR_FOUNDED
+                .replaceAll("\\{sector}", args[0])))));
         } else {
             p.sendMessage(ConfigManager.INVALID_NAME);
         }

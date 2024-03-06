@@ -1,8 +1,12 @@
 package me.jm3l.sectors.manager;
 
+import me.jm3l.sectors.utilities.text.MessageUtilities;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.configuration.file.FileConfiguration;
+
+import java.util.Objects;
 
 import static org.bukkit.ChatColor.translateAlternateColorCodes;
 
@@ -31,40 +35,41 @@ public class ConfigManager {
         ARCHER_TAG_DAMAGE_MULTIPLIER = config.getDouble("archer-tag-multiplier");
 
 
-        FORMATTED_CHAT = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("formatted-chat")));
-        NO_SECTOR_FORMATTED_CHAT = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("no-sector-formatted-chat")));
+        FORMATTED_CHAT = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("formatted-chat"))));
+        NO_SECTOR_FORMATTED_CHAT = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("no-sector-formatted-chat"))));
 
-        NO_PERMISSION = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("no-permission")));
-        MISSING_ARGUMENT = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("missing-argument")));
-        SECTOR_UNCLAIM = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("sector-unclaim")));
-        SECTOR_NO_CLAIM = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("sector-no-claim")));
-        SECTOR_NO_HOME = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("sector-no-home")));
-        NOT_IN_SECTOR = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("msg-must-be-in-sector")));
-        SUCCESS = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("msg-success")));
-        MUST_BE_LEADER = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("msg-must-be-leader")));
-        PLAYER_NOT_FOUND = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("msg-player-not-found")));
-        NO_INVITE = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("msg-no-invite")));
-        ALREADY_HAS_CLAIM = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("already-has-claim")));
-        TRIED_CLAIM_NO_SELECTION = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("tried-claim-no-selection")));
-        CLAIM_TOO_BIG = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("claim-too-big")));
-        CLAIM_TOO_NARROW = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("claim-too-small-or-narrow")));
-        LAND_ALREADY_CLAIMED = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("land-already-claimed")));
-        MUST_HAVE_CLAIM = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("must-have-claim")));
-        HOME_MUST_BE_IN_CLAIM = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("home-must-be-in-claim")));
-        ALREADY_IN_SECTOR = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("already-in-sector")));
-        NAME_TOO_LONG = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("name-too-long")));
-        NAME_TAKEN = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("name-taken")));
-        INVALID_NAME = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("invalid-name")));
-        SECTOR_FOUNDED = translateAlternateColorCodes('&', config.getString("sector-founded"));
-        NEW_LEADER = translateAlternateColorCodes('&', config.getString("new-leader"));
-        YOU_ARE_LEADER = translateAlternateColorCodes('&', config.getString("you-are-leader"));
-        SECTOR_DISSOLVED = translateAlternateColorCodes('&', config.getString("sector-dissolved"));
-        KICKED_FROM_SECTOR = translateAlternateColorCodes('&', config.getString("kicked-from-sector"));
-        LEAVE_SECTOR = translateAlternateColorCodes('&', config.getString("leave-sector"));
-        JOIN_SECTOR = translateAlternateColorCodes('&', config.getString("joined-sector"));
-        TELEPORT_PENDING = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("teleport-pending").replaceAll("\\{seconds}", Long.toString((TELEPORT_DELAY/20)))));
-        NOT_A_PLAYER_OR_SECTOR = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("not-a-player-or-sector")));
-        ARCHER_TAGGED = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("archer-tagged")));
+        NO_PERMISSION = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("no-permission")))));
+        MISSING_ARGUMENT = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("missing-argument")))));
+        SECTOR_UNCLAIM = MessageUtilities.createAlertIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("sector-unclaim")))));
+        SECTOR_NO_CLAIM = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("sector-no-claim")))));
+        SECTOR_NO_HOME = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("sector-no-home")))));
+        NOT_IN_SECTOR = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("msg-must-be-in-sector")))));
+        SUCCESS = MessageUtilities.createSuccessIcon(TextColor.color(46,125,50)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("msg-success")))));
+        MUST_BE_LEADER = MessageUtilities.createAlertIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("msg-must-be-leader")))));
+        CANT_KICK_YOURSELF = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("cant-kick-yourself")))));
+        PLAYER_NOT_FOUND = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("msg-player-not-found")))));
+        NO_INVITE = MessageUtilities.createAlertIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("msg-no-invite")))));
+        ALREADY_HAS_CLAIM = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("already-has-claim")))));
+        TRIED_CLAIM_NO_SELECTION = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("tried-claim-no-selection")))));
+        CLAIM_TOO_BIG = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("claim-too-big")))));
+        CLAIM_TOO_NARROW = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("claim-too-small-or-narrow")))));
+        LAND_ALREADY_CLAIMED = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("land-already-claimed")))));
+        MUST_HAVE_CLAIM = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("must-have-claim")))));
+        HOME_MUST_BE_IN_CLAIM = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("home-must-be-in-claim")))));
+        ALREADY_IN_SECTOR = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("already-in-sector")))));
+        NAME_TOO_LONG = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("name-too-long")))));
+        NAME_TAKEN = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("name-taken")))));
+        INVALID_NAME = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("invalid-name")))));
+        SECTOR_FOUNDED = translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("sector-founded")));
+        NEW_LEADER = translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("new-leader")));
+        YOU_ARE_LEADER = translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("you-are-leader")));
+        SECTOR_DISSOLVED = translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("sector-dissolved")));
+        KICKED_FROM_SECTOR = translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("kicked-from-sector")));
+        LEAVE_SECTOR = translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("leave-sector")));
+        JOIN_SECTOR = translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("joined-sector")));
+        TELEPORT_PENDING = MessageUtilities.createTeleportIcon(TextColor.color(142,36,170)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("teleport-pending")).replaceAll("\\{seconds}", Long.toString((TELEPORT_DELAY/20))))));
+        NOT_A_PLAYER_OR_SECTOR = MessageUtilities.createXIcon(TextColor.color(255,0,0)).append(LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("not-a-player-or-sector")))));
+        //ARCHER_TAGGED = LegacyComponentSerializer.legacyAmpersand().deserialize(translateAlternateColorCodes('&', config.getString("archer-tagged")));
 
         FORMAT_CHAT = config.getBoolean("format-chat");
         MOB_SPAWN_IN_CLAIMS = config.getBoolean("mob-spawn-in-claims");
@@ -113,6 +118,7 @@ public class ConfigManager {
     public static TextComponent NOT_IN_SECTOR;
     public static TextComponent SUCCESS;
     public static TextComponent MUST_BE_LEADER;
+    public static TextComponent CANT_KICK_YOURSELF;
     public static TextComponent PLAYER_NOT_FOUND;
     public static TextComponent NOT_A_PLAYER_OR_SECTOR;
     public static TextComponent NO_INVITE;
@@ -135,5 +141,5 @@ public class ConfigManager {
     public static String LEAVE_SECTOR;
     public static String JOIN_SECTOR;
     public static TextComponent TELEPORT_PENDING;
-    public static TextComponent ARCHER_TAGGED;
+    //public static TextComponent ARCHER_TAGGED;
 }
