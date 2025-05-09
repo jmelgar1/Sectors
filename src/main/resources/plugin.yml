@@ -1,0 +1,16 @@
+name: Sectors
+version: 1.0-ALPHA
+description: A unique area claiming plugin for Minecraft
+main: me.jm3l.sectors.Sectors
+author: jm3L
+api-version: 1.21
+depend: [ packetevents ]
+commands:
+  sectors:
+    description: Use Sectors.
+    aliases: [s, sectors, sec, S, Sectors, Sec]
+  savesectors:
+    description: Save sectors.yml
+permissions:
+  sec.admin:
+    default: op
