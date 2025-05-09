@@ -1,6 +1,6 @@
 package me.jm3l.sectors.runnables;
 
-import com.comphenix.protocol.events.PacketContainer;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.command.wand.util.ClaimToolPacketUtilities;
 import me.jm3l.sectors.utilities.PacketPair;
@@ -14,11 +14,8 @@ import java.util.UUID;
 
 public class ClaimParticleTask extends BukkitRunnable {
 
-    private final Map<UUID, PacketContainer> playerMarkers = new HashMap<>();
-    public Map<UUID, PacketContainer> getPlayerMarkers() {return playerMarkers;}
-
-    private final Map<UUID, PacketPair> playerClaimPositions = new HashMap<>();
-    public Map<UUID, PacketPair> getPlayerClaimPositions() {return playerClaimPositions;}
+    private final Map<UUID, WrapperPlayServerSpawnEntity> playerMarkers = new HashMap<>();
+    public Map<UUID, WrapperPlayServerSpawnEntity> getPlayerMarkers() {return playerMarkers;}
 
     private final Map<UUID, Integer> playerMarkerDistances = new HashMap<>();
     public Map<UUID, Integer> getPlayerMarkerDistances() {return playerMarkerDistances;}
@@ -33,14 +30,20 @@ public class ClaimParticleTask extends BukkitRunnable {
                     plugin.getClaimWand().isWand(p.getInventory().getItemInMainHand())) {
 
                 Location targetLocation = ClaimToolPacketUtilities.getTargetLocation(p, plugin);
-                PacketContainer marker = playerMarkers.get(p.getUniqueId());
+                WrapperPlayServerSpawnEntity marker = playerMarkers.get(p.getUniqueId());
                 PacketPair packetPair = plugin.getClaimToolEvents().getPlayerClaimPositions().get(p.getUniqueId());
 
                 if (marker == null) {
-                    PacketContainer newPacket = ClaimToolPacketUtilities.setMarkerPacket(targetLocation, p, plugin);
-                    plugin.getClaimParticleTask().getPlayerMarkers().put(p.getUniqueId(), newPacket);
-                    plugin.getClaimToolEvents().getPlayerClaimPositions().computeIfAbsent(p.getUniqueId(), k -> new PacketPair(null, null));
-                } else if(packetPair.getPacketOne() == null || packetPair.getPacketTwo() == null){
+                    WrapperPlayServerSpawnEntity newPacket = ClaimToolPacketUtilities.setMarkerPacket(targetLocation, p, plugin);
+                    if (newPacket != null) {
+                        playerMarkers.put(p.getUniqueId(), newPacket);
+                        plugin.getClaimToolEvents().getPlayerClaimPositions().computeIfAbsent(p.getUniqueId(), k -> new PacketPair(null, null));
+                    }
+                } else if (packetPair != null && (packetPair.getPacketOne() == null || packetPair.getPacketTwo() == null)) {
+                    ClaimToolPacketUtilities.teleportMarkerPacket(marker, targetLocation, p, plugin);
+                } else if (packetPair == null) {
+                    // Initialize a new packetPair for this player
+                    plugin.getClaimToolEvents().getPlayerClaimPositions().put(p.getUniqueId(), new PacketPair(null, null));
                     ClaimToolPacketUtilities.teleportMarkerPacket(marker, targetLocation, p, plugin);
                 }
             } else if (playerMarkers.containsKey(p.getUniqueId())) {

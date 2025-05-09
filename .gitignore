@@ -120,3 +120,12 @@ run/
 build
 .gradle
 /*.jar
+.gitattributes
+.editorconfig
+
+# Additional items
+bin/
+deploy-and-run.ps1
+run-server/
+.vscode/
+

@@ -3,8 +3,8 @@ version: 1.0-ALPHA
 description: A unique area claiming plugin for Minecraft
 main: me.jm3l.sectors.Sectors
 author: jm3L
-api-version: 1.20
-depend: [ ProtocolLib ]
+api-version: 1.21
+depend: [ packetevents ]
 commands:
   sectors:
     description: Use Sectors.

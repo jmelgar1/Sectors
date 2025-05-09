@@ -1,7 +1,5 @@
 package me.jm3l.sectors;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
 import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.FileUtils.SectorsFile;
 import me.jm3l.sectors.command.SCommand;
@@ -16,13 +14,11 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.github.retrooper.packetevents.PacketEvents;
+
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
+
 public final class Sectors extends JavaPlugin {
-
-    private ProtocolManager protocolManager;
-    public ProtocolManager getProtocolManager(){
-        return this.protocolManager;
-    }
-
     private ClaimWand claimWand;
     public ClaimWand getClaimWand(){ return claimWand; }
     public ItemStack getWand(){
@@ -55,7 +51,15 @@ public final class Sectors extends JavaPlugin {
     }
 
     @Override
+    public void onLoad() {
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        //On Bukkit, calling this here is essential, hence the name "load"
+        PacketEvents.getAPI().load();
+    }
+
+    @Override
     public void onEnable() {
+        PacketEvents.getAPI().init();
         this.claimToolEvents = new ClaimToolEvents(this);
         this.claimParticleTask = new ClaimParticleTask(this);
         this.events = new Events(this);
@@ -74,12 +78,11 @@ public final class Sectors extends JavaPlugin {
         getServer().getPluginManager().registerEvents(events, this);
         getServer().getPluginManager().registerEvents(claimToolEvents, this);
         claimParticleTask.runTaskTimer(this, 0L, 1L);
-
-        protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
     @Override
     public void onDisable() {
         sectorsFile.saveSectors();
+        PacketEvents.getAPI().terminate();
     }
 }

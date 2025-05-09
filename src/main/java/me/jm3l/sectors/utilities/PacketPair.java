@@ -1,29 +1,29 @@
 package me.jm3l.sectors.utilities;
 
-import com.comphenix.protocol.events.PacketContainer;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 
 public class PacketPair {
-    private PacketContainer packetOne;
-    private PacketContainer packetTwo;
+    private WrapperPlayServerSpawnEntity packetOne;
+    private WrapperPlayServerSpawnEntity packetTwo;
 
-    public PacketPair(PacketContainer packetOne, PacketContainer packetTwo) {
+    public PacketPair(WrapperPlayServerSpawnEntity packetOne, WrapperPlayServerSpawnEntity packetTwo) {
         this.packetOne = packetOne;
         this.packetTwo = packetTwo;
     }
 
-    public void setPacketOne(PacketContainer packet){
+    public void setPacketOne(WrapperPlayServerSpawnEntity packet){
         this.packetOne = packet;
     }
 
-    public void setPacketTwo(PacketContainer packet){
+    public void setPacketTwo(WrapperPlayServerSpawnEntity packet){
         this.packetTwo = packet;
     }
 
-    public PacketContainer getPacketOne() {
+    public WrapperPlayServerSpawnEntity getPacketOne() {
         return this.packetOne;
     }
 
-    public PacketContainer getPacketTwo() {
+    public WrapperPlayServerSpawnEntity getPacketTwo() {
         return this.packetTwo;
     }
 }

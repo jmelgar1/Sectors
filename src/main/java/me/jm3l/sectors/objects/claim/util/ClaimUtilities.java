@@ -1,11 +1,13 @@
 package me.jm3l.sectors.objects.claim.util;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.WrappedDataValue;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import com.google.common.collect.Lists;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
+import com.github.retrooper.packetevents.util.Vector3d;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.service.PlayerEntityService;
@@ -14,52 +16,45 @@ import me.jm3l.sectors.utilities.nms.NmsRegistry;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClaimUtilities {
-    public static void showGlowingBounds(List<Location> edgeLocations, Player p, Sectors plugin, PlayerEntityService playerEntityService) {
-        ProtocolManager protocolManager = plugin.getProtocolManager();
+    private static final AtomicInteger nextEntityId = new AtomicInteger(1000000);
 
+    public static void showGlowingBounds(List<Location> edgeLocations, Player p, Sectors plugin, PlayerEntityService playerEntityService) {
         for (Location loc : edgeLocations) {
             loc.add(0.5, 0, 0.5);
 
-            PacketContainer spawnPacket = protocolManager.createPacket(PacketType.Play.Server.SPAWN_ENTITY);
-            int uniqueId = (int) (Math.random() * Integer.MAX_VALUE);
+            int entityId = nextEntityId.getAndIncrement();
 
-            spawnPacket.getIntegers()
-                .write(0, uniqueId)
-                .write(4, NmsRegistry.getBlockId(Material.WHITE_STAINED_GLASS.createBlockData()));
-            spawnPacket.getUUIDs()
-                .write(0, UUID.randomUUID());
-            spawnPacket.getEntityTypeModifier()
-                .write(0, EntityType.FALLING_BLOCK);
-            spawnPacket.getDoubles()
-                .write(0, loc.getX())
-                .write(1, loc.getY())
-                .write(2, loc.getZ());
-
-            protocolManager.sendServerPacket(p, spawnPacket);
-
-            PacketContainer metadataPacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
-            metadataPacket.getModifier().writeDefaults();
-            metadataPacket.getIntegers().write(0, uniqueId);
-
-            WrappedDataWatcher.Serializer booleanType = WrappedDataWatcher.Registry.get(Boolean.class);
-            List<WrappedDataValue> values = Lists.newArrayList(
-                new WrappedDataValue(0, WrappedDataWatcher.Registry.get(Byte.class), (byte) (0x40)),
-                new WrappedDataValue(5, booleanType, true)
+            WrapperPlayServerSpawnEntity spawnPacket = new WrapperPlayServerSpawnEntity(
+                entityId,
+                Optional.of(UUID.randomUUID()),
+                EntityTypes.FALLING_BLOCK,
+                new Vector3d(loc.getX(), loc.getY(), loc.getZ()),
+                0.0f,
+                0.0f,
+                0.0f,
+                NmsRegistry.getBlockId(Material.WHITE_STAINED_GLASS.createBlockData()),
+                Optional.of(new Vector3d(0, 0, 0))
             );
 
-            metadataPacket.getDataValueCollectionModifier().write(0, values);
-            protocolManager.sendServerPacket(p, metadataPacket);
+            List<EntityData<?>> metadata = new ArrayList<>();
+            metadata.add(new EntityData(0, EntityDataTypes.BYTE, (byte) 0x40)); // Glowing flag
+            metadata.add(new EntityData(5, EntityDataTypes.BOOLEAN, true));    // No gravity
+            WrapperPlayServerEntityMetadata metadataPacket = new WrapperPlayServerEntityMetadata(entityId, metadata);
 
-            playerEntityService.addEntityIDForPlayer(p, uniqueId);
+            PacketEvents.getAPI().getPlayerManager().sendPacket(p, spawnPacket);
+            PacketEvents.getAPI().getPlayerManager().sendPacket(p, metadataPacket);
+
+            playerEntityService.addEntityIDForPlayer(p, entityId);
         }
     }
 
@@ -109,14 +104,14 @@ public class ClaimUtilities {
     }
 
     public static void removeGlowingBounds(Player p, Sectors plugin) {
-        ProtocolManager protocolManager = plugin.getProtocolManager();
         List<Integer> entityIDsForPlayer = ServiceManager.getPlayerEntityService().getEntityIDsForPlayer(p);
         if (entityIDsForPlayer.isEmpty()) return;
-        PacketContainer destroyPacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
-        destroyPacket.getIntLists().write(0, entityIDsForPlayer);
 
-        protocolManager.sendServerPacket(p, destroyPacket);
+        int[] entityIDs = entityIDsForPlayer.stream().mapToInt(Integer::intValue).toArray();
+        WrapperPlayServerDestroyEntities destroyPacket = new WrapperPlayServerDestroyEntities(entityIDs);
+        PacketEvents.getAPI().getPlayerManager().sendPacket(p, destroyPacket);
 
         entityIDsForPlayer.clear();
     }
+    //refresh
 }

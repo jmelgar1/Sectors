@@ -1,6 +1,6 @@
 package me.jm3l.sectors.command.wand.events;
 
-import com.comphenix.protocol.events.PacketContainer;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.command.wand.util.ClaimToolPacketUtilities;
 import me.jm3l.sectors.manager.ServiceManager;
@@ -80,34 +80,34 @@ public class ClaimToolEvents implements Listener {
         ClaimSelection selection = plugin.getData().getSelection(p);
         if(packetPair != null) {
             if (packetPair.getPacketOne() == null || packetPair.getPacketTwo() == null) {
-                PacketContainer storedPacket = plugin.getClaimParticleTask().getPlayerMarkers().get(p.getUniqueId());
-                Double x = storedPacket.getDoubles().read(0);
-                Double y = storedPacket.getDoubles().read(1);
-                Double z = storedPacket.getDoubles().read(2);
-                Location realLocation = new Location(p.getLocation().getWorld(), x, y, z);
+                WrapperPlayServerSpawnEntity storedPacket = plugin.getClaimParticleTask().getPlayerMarkers().get(p.getUniqueId());
+                if (storedPacket != null) {
+                    double x = storedPacket.getPosition().getX();
+                    double y = storedPacket.getPosition().getY();
+                    double z = storedPacket.getPosition().getZ();
+                    Location realLocation = new Location(p.getLocation().getWorld(), x, y, z);
 
-                if (packetPair.getPacketOne() == null && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)) {
-                    selection.setPos1(realLocation);
-                    plugin.getData().getSelections().put(p, selection);
+                    if (packetPair.getPacketOne() == null && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)) {
+                        selection.setPos1(realLocation);
+                        plugin.getData().getSelections().put(p, selection);
 
-                    PacketContainer packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p, plugin);
-                    packetPair.setPacketOne(packet);
-                    p.sendMessage("Set position 1");
-                } else if (packetPair.getPacketTwo() == null && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)) {
-                    selection.setPos2(realLocation);
-                    plugin.getData().getSelections().put(p, selection);
+                        WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p, plugin);
+                        packetPair.setPacketOne(packet);
+                        p.sendMessage("Set position 1");
+                    } else if (packetPair.getPacketTwo() == null && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)) {
+                        selection.setPos2(realLocation);
+                        plugin.getData().getSelections().put(p, selection);
 
-                    PacketContainer packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p, plugin);
-                    packetPair.setPacketTwo(packet);
-                    p.sendMessage("Set position 2");
-                }
+                        WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p, plugin);
+                        packetPair.setPacketTwo(packet);
+                        p.sendMessage("Set position 2");
+                    }
 
-                if (!selection.pos1().isZero() && !selection.pos2().isZero()) {
-
-                    p.sendMessage("Pos1: " + selection.pos1().toString());
-                    p.sendMessage("Pos2: " + selection.pos2().toString());
-
-                    ClaimUtilities.showGlowingBounds(selection.getEdgeLocations(), p, plugin, ServiceManager.getPlayerEntityService());
+                    if (!selection.pos1().isZero() && !selection.pos2().isZero()) {
+                        p.sendMessage("Pos1: " + selection.pos1().toString());
+                        p.sendMessage("Pos2: " + selection.pos2().toString());
+                        ClaimUtilities.showGlowingBounds(selection.getEdgeLocations(), p, plugin, ServiceManager.getPlayerEntityService());
+                    }
                 }
             } else {
                 p.sendMessage("You can only have 2 points, right click a corner to move it.");
