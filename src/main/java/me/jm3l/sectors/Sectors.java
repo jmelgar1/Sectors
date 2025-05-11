@@ -12,11 +12,11 @@ import me.jm3l.sectors.runnables.ClaimParticleTask;
 import me.jm3l.sectors.utilities.PlayerData;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import com.github.retrooper.packetevents.PacketEvents;
 
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Sectors extends JavaPlugin {
     private ClaimWand claimWand;
@@ -48,6 +48,7 @@ public final class Sectors extends JavaPlugin {
     private ClaimParticleTask claimParticleTask;
     public ClaimParticleTask getClaimParticleTask(){
         return this.claimParticleTask;
+        
     }
 
     @Override

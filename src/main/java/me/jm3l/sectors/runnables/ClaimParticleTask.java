@@ -35,19 +35,24 @@ public class ClaimParticleTask extends BukkitRunnable {
 
                 if (marker == null) {
                     WrapperPlayServerSpawnEntity newPacket = ClaimToolPacketUtilities.setMarkerPacket(targetLocation, p, plugin);
+                    System.out.println("ClaimParticleTask: newPacket is not null for player " + p.getName());
                     if (newPacket != null) {
                         playerMarkers.put(p.getUniqueId(), newPacket);
                         plugin.getClaimToolEvents().getPlayerClaimPositions().computeIfAbsent(p.getUniqueId(), k -> new PacketPair(null, null));
+                        System.out.println("ClaimParticleTask: newPacket is not null for player " + p.getName());
                     }
                 } else if (packetPair != null && (packetPair.getPacketOne() == null || packetPair.getPacketTwo() == null)) {
                     ClaimToolPacketUtilities.teleportMarkerPacket(marker, targetLocation, p, plugin);
+                    System.out.println("teleportMarkerPacket: marker is not null, but packetPair is null for player " + p.getName());
                 } else if (packetPair == null) {
                     // Initialize a new packetPair for this player
                     plugin.getClaimToolEvents().getPlayerClaimPositions().put(p.getUniqueId(), new PacketPair(null, null));
                     ClaimToolPacketUtilities.teleportMarkerPacket(marker, targetLocation, p, plugin);
+                    System.out.println("ClaimParticleTask: marker is not null, but packetPair is null for player " + p.getName());
                 }
             } else if (playerMarkers.containsKey(p.getUniqueId())) {
                 ClaimToolPacketUtilities.clearAllPositionsAndMarkers(p, true, plugin);
+                System.out.println("ClaimParticleTask: playerMarkers.containsKey(p.getUniqueId()) is true for player " + p.getName());
             }
         }
     }

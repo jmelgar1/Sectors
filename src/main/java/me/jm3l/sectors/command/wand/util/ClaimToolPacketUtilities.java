@@ -48,7 +48,7 @@ public class ClaimToolPacketUtilities {
 
         List<EntityData<?>> metadataList = new ArrayList<>();
         byte flags = (byte) (0x20 | 0x40); // invisible and glowing
-        EntityData flagsData = new EntityData(0, EntityDataTypes.BYTE, flags);
+        EntityData<Byte> flagsData = new EntityData<>(0, EntityDataTypes.BYTE, flags);
         metadataList.add(flagsData);
         WrapperPlayServerEntityMetadata metadataPacket = new WrapperPlayServerEntityMetadata(entityId, metadataList);
         PacketEvents.getAPI().getPlayerManager().sendPacket(p, metadataPacket);
@@ -66,8 +66,10 @@ public class ClaimToolPacketUtilities {
 
     public static void teleportMarkerPacket(WrapperPlayServerSpawnEntity packet, Location newLocation, Player p, Sectors plugin) {
         if (packet == null) {
+            System.out.println("teleportMarkerPacket: packet is null for player " + p.getName());
             WrapperPlayServerSpawnEntity newPacket = setMarkerPacket(newLocation, p, plugin);
             if (newPacket != null) {
+                System.out.println(plugin.getClaimParticleTask().getPlayerMarkers().toString());
                 plugin.getClaimParticleTask().getPlayerMarkers().put(p.getUniqueId(), newPacket);
             }
             return;
@@ -94,6 +96,7 @@ public class ClaimToolPacketUtilities {
                 false // on ground
             );
             PacketEvents.getAPI().getPlayerManager().sendPacket(p, teleportPacket);
+            System.out.println("teleportMarkerPacket: sent teleport packet for player " + p.getName());
             // Note: Not replacing the packet in the map, as the original spawn packet is still needed
         } catch (Exception e) {
             WrapperPlayServerSpawnEntity newPacket = setMarkerPacket(newLocation, p, plugin);
