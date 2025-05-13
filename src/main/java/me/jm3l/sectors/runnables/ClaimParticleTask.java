@@ -4,6 +4,8 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSp
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.command.wand.util.ClaimToolPacketUtilities;
 import me.jm3l.sectors.utilities.PacketPair;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -34,9 +36,10 @@ public class ClaimParticleTask extends BukkitRunnable {
                 PacketPair packetPair = plugin.getClaimToolEvents().getPlayerClaimPositions().get(p.getUniqueId());
 
                 if (marker == null) {
-                    WrapperPlayServerSpawnEntity newPacket = ClaimToolPacketUtilities.setMarkerPacket(targetLocation, p, plugin);
+                    WrapperPlayServerSpawnEntity newPacket = ClaimToolPacketUtilities.setMarkerPacket(targetLocation, p);
                     if (newPacket != null) {
                         playerMarkers.put(p.getUniqueId(), newPacket);
+                        Bukkit.broadcastMessage(playerMarkers.toString());
                         plugin.getClaimToolEvents().getPlayerClaimPositions().computeIfAbsent(p.getUniqueId(), k -> new PacketPair(null, null));
                     }
                 } else if (packetPair != null && (packetPair.getPacketOne() == null || packetPair.getPacketTwo() == null)) {

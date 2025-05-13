@@ -7,6 +7,8 @@ import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.objects.claim.util.ClaimUtilities;
 import me.jm3l.sectors.utilities.PacketPair;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -27,31 +29,32 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ClaimToolPacketUtilities {
     private static final AtomicInteger nextEntityId = new AtomicInteger(1000000);
 
-    public static WrapperPlayServerSpawnEntity setMarkerPacket(Location location, Player p, Sectors plugin) {
+public static WrapperPlayServerSpawnEntity setMarkerPacket(Location location, Player p) {
         World world = location.getWorld();
         if (world == null) return null;
 
         int entityId = nextEntityId.getAndIncrement();
         UUID entityUUID = UUID.randomUUID();
+        
         WrapperPlayServerSpawnEntity spawnPacket = new WrapperPlayServerSpawnEntity(
-            entityId,                              // int
-            Optional.of(entityUUID),              // Wrap UUID in Optional
-            EntityTypes.SHULKER,                  // Use PacketEvents' EntityTypes
-            new Vector3d(location.getX(), location.getY(), location.getZ()), // Vector3d position
-            0.0f,                                 // float pitch
-            0.0f,                                 // float yaw
-            0.0f,                                 // float headYaw
-            0,                                    // int data
+            entityId,
+            Optional.of(entityUUID),
+            EntityTypes.SHULKER,
+            new Vector3d(location.getX(), location.getY(), location.getZ()),
+            0.0f,
+            0.0f,
+            0.0f,
+            0,
             Optional.of(new Vector3d(0.0, 0.0, 0.0))
         );
         PacketEvents.getAPI().getPlayerManager().sendPacket(p, spawnPacket);
 
-        List<EntityData<?>> metadataList = new ArrayList<>();
-        byte flags = (byte) (0x20 | 0x40); // invisible and glowing
-        EntityData flagsData = new EntityData(0, EntityDataTypes.BYTE, flags);
-        metadataList.add(flagsData);
-        WrapperPlayServerEntityMetadata metadataPacket = new WrapperPlayServerEntityMetadata(entityId, metadataList);
-        PacketEvents.getAPI().getPlayerManager().sendPacket(p, metadataPacket);
+        // List<EntityData<?>> metadataList = new ArrayList<>();
+        // byte flags = (byte) (0x20 | 0x40);
+        // EntityData<Byte> flagsData = new EntityData<>(0, EntityDataTypes.BYTE, flags);
+        // metadataList.add(flagsData);       
+        // WrapperPlayServerEntityMetadata metadataPacket = new WrapperPlayServerEntityMetadata(entityId, metadataList);
+        // PacketEvents.getAPI().getPlayerManager().sendPacket(p, metadataPacket);
 
         return spawnPacket;
     }
@@ -66,7 +69,7 @@ public class ClaimToolPacketUtilities {
 
     public static void teleportMarkerPacket(WrapperPlayServerSpawnEntity packet, Location newLocation, Player p, Sectors plugin) {
         if (packet == null) {
-            WrapperPlayServerSpawnEntity newPacket = setMarkerPacket(newLocation, p, plugin);
+            WrapperPlayServerSpawnEntity newPacket = setMarkerPacket(newLocation, p);
             if (newPacket != null) {
                 plugin.getClaimParticleTask().getPlayerMarkers().put(p.getUniqueId(), newPacket);
             }
@@ -96,7 +99,7 @@ public class ClaimToolPacketUtilities {
             PacketEvents.getAPI().getPlayerManager().sendPacket(p, teleportPacket);
             // Note: Not replacing the packet in the map, as the original spawn packet is still needed
         } catch (Exception e) {
-            WrapperPlayServerSpawnEntity newPacket = setMarkerPacket(newLocation, p, plugin);
+            WrapperPlayServerSpawnEntity newPacket = setMarkerPacket(newLocation, p);
             if (newPacket != null) {
                 plugin.getClaimParticleTask().getPlayerMarkers().put(p.getUniqueId(), newPacket);
             }

@@ -16,6 +16,7 @@ import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.Material;
 
 import java.util.*;
 
@@ -123,7 +124,8 @@ public class Sector implements ConfigurationSerializable {
     public Claim getClaim() {
         return this.claim;
     }
-    public void setClaim(Claim c) {
+
+    public void setClaim(Claim c, Player p) {
         this.claim = c;
     }
     public boolean hasClaim() {return this.claim != null;}
@@ -242,7 +244,7 @@ public class Sector implements ConfigurationSerializable {
             sendInfoMessage(p, "Claim start: ", String.valueOf(this.claim.start()), claimColor);
             sendInfoMessage(p, "Claim end: ", String.valueOf(this.claim.end()), claimColor);
             if (this.claim.getBounds().contains(p.getLocation().toVector())) {
-                ClaimUtilities.showGlowingBounds(this.claim.getEdgeLocations(), p, plugin, ServiceManager.getPlayerEntityService());
+                ClaimUtilities.showGlowingBounds(this.claim.getEdgeLocations(), p, ServiceManager.getPlayerEntityService(), Material.WHITE_STAINED_GLASS);
             }
         } else {
             sendInfoMessage(p, "Claim: ", "This sector does not have a claim.", noClaimColor);

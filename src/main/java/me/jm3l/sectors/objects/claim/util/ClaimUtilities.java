@@ -28,7 +28,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ClaimUtilities {
     private static final AtomicInteger nextEntityId = new AtomicInteger(1000000);
 
-    public static void showGlowingBounds(List<Location> edgeLocations, Player p, Sectors plugin, PlayerEntityService playerEntityService) {
+    /**
+     * Shows glowing block outlines for claim boundaries
+     * @param edgeLocations List of locations to show
+     * @param p Player to show the outline to
+     * @param plugin Main plugin instance
+     * @param playerEntityService Entity service
+     * @param material Material to use for the outline (default is WHITE_STAINED_GLASS if null)
+     */
+    public static void showGlowingBounds(List<Location> edgeLocations, Player p, PlayerEntityService playerEntityService, Material material) {
+        Material blockMaterial = material != null ? material : Material.WHITE_STAINED_GLASS;
+        
         for (Location loc : edgeLocations) {
             loc.add(0.5, 0, 0.5);
 
@@ -42,7 +52,7 @@ public class ClaimUtilities {
                 0.0f,
                 0.0f,
                 0.0f,
-                NmsRegistry.getBlockId(Material.WHITE_STAINED_GLASS.createBlockData()),
+                NmsRegistry.getBlockId(blockMaterial.createBlockData()),
                 Optional.of(new Vector3d(0, 0, 0))
             );
 

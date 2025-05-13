@@ -22,19 +22,26 @@ public class ServerVersion {
      */
     public static boolean isGreaterThan(int major, int minor, int patch) {
         String version = getServerVersion();
-        // Assuming version format is "v1_XX_RX", where XX is the major version and R is the minor/revision
-        String[] parts = version.split("_");
-        try {
-            int currentMajor = Integer.parseInt(parts[1]);
-            int currentMinor = Integer.parseInt(parts[2].substring(1));
-            if (currentMajor > major) {
-                return true;
-            } else if (currentMajor == major) {
-                return currentMinor > minor || (currentMinor == minor && patch == 0);
+        if (version.startsWith("v")) {
+            String[] parts = version.split("_");
+            try {
+                if (parts.length >= 3) {
+                    int currentMajor = Integer.parseInt(parts[1]);
+                    int currentMinor = Integer.parseInt(parts[2].replaceAll("[^0-9]", ""));
+                    if (currentMajor > major) {
+                        return true;
+                    } else if (currentMajor == major) {
+                        return currentMinor > minor || (currentMinor == minor && patch == 0);
+                    }
+                } else {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                return false;
             }
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            // Handle exception
+        } else {
+            return true;
         }
         return false;
     }

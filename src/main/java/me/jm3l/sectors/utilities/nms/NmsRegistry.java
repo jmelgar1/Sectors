@@ -3,6 +3,7 @@ package me.jm3l.sectors.utilities.nms;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.bukkit.Bukkit;
 import org.bukkit.block.data.BlockData;
 
 import java.lang.reflect.Method;
@@ -18,23 +19,33 @@ public class NmsRegistry {
     private static Class<?> blockClass;
     private static Method getStateMethod;
     private static Method getIdMethod;
+    private static boolean initialized = false;
 
     static {
         try {
-            findBlockClass();
-        } catch (ClassNotFoundException e) {
+            initialize();
+        } catch (Exception e) {
+            Bukkit.getLogger().severe("Failed to initialize NmsRegistry: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    private static void findBlockClass() throws ClassNotFoundException {
-        if (ServerVersion.isGreaterThan(1, 17, 1)) {
+    private static void initialize() throws ClassNotFoundException {
+        if (initialized) return;
+        
+        try {
             blockClass = Class.forName("net.minecraft.world.level.block.Block");
-        } else {
-            blockClass = Class.forName(
-                "net.minecraft.server." + ServerVersion.getNmsVersion() + ".Block"
-            );
+        } catch (ClassNotFoundException e) {
+            try {
+                blockClass = Class.forName(
+                    "net.minecraft.server." + ServerVersion.getNmsVersion() + ".Block"
+                );
+            } catch (ClassNotFoundException ex) {
+                blockClass = Class.forName("net.minecraft.world.level.block.Block");
+            }
         }
+        
+        initialized = true;
     }
 
     /**
@@ -43,6 +54,10 @@ public class NmsRegistry {
     @SneakyThrows
     public static int getBlockId(BlockData blockData) {
         try {
+            if (!initialized) {
+                initialize();
+            }
+            
             if (getStateMethod == null) {
                 getStateMethod = blockData.getClass().getMethod("getState");
             }
@@ -59,9 +74,9 @@ public class NmsRegistry {
             }
             return (int) getIdMethod.invoke(null, state);
         } catch (ReflectiveOperationException e) {
+            Bukkit.getLogger().severe("Failed to get block ID: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("Failed to get block ID", e);
+            return 0;
         }
     }
-
 }

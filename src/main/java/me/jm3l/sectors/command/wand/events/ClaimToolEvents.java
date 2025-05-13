@@ -7,6 +7,7 @@ import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.objects.claim.ClaimSelection;
 import me.jm3l.sectors.objects.claim.util.ClaimUtilities;
 import me.jm3l.sectors.utilities.PacketPair;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,6 +18,7 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.Material;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -82,23 +84,22 @@ public class ClaimToolEvents implements Listener {
             if (packetPair.getPacketOne() == null || packetPair.getPacketTwo() == null) {
                 WrapperPlayServerSpawnEntity storedPacket = plugin.getClaimParticleTask().getPlayerMarkers().get(p.getUniqueId());
                 if (storedPacket != null) {
-                    double x = storedPacket.getPosition().getX();
-                    double y = storedPacket.getPosition().getY();
-                    double z = storedPacket.getPosition().getZ();
-                    Location realLocation = new Location(p.getLocation().getWorld(), x, y, z);
+                    Location realLocation = ClaimToolPacketUtilities.getTargetLocation(p, plugin);
+                    
+                    Bukkit.broadcastMessage("Real Location: " + realLocation.toString());
 
                     if (packetPair.getPacketOne() == null && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)) {
                         selection.setPos1(realLocation);
                         plugin.getData().getSelections().put(p, selection);
 
-                        WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p, plugin);
+                        WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p);
                         packetPair.setPacketOne(packet);
                         p.sendMessage("Set position 1");
                     } else if (packetPair.getPacketTwo() == null && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)) {
                         selection.setPos2(realLocation);
                         plugin.getData().getSelections().put(p, selection);
 
-                        WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p, plugin);
+                        WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p);
                         packetPair.setPacketTwo(packet);
                         p.sendMessage("Set position 2");
                     }
@@ -106,7 +107,7 @@ public class ClaimToolEvents implements Listener {
                     if (!selection.pos1().isZero() && !selection.pos2().isZero()) {
                         p.sendMessage("Pos1: " + selection.pos1().toString());
                         p.sendMessage("Pos2: " + selection.pos2().toString());
-                        ClaimUtilities.showGlowingBounds(selection.getEdgeLocations(), p, plugin, ServiceManager.getPlayerEntityService());
+                        ClaimUtilities.showGlowingBounds(selection.getEdgeLocations(), p, ServiceManager.getPlayerEntityService(), Material.LIME_STAINED_GLASS);
                     }
                 }
             } else {
