@@ -1,6 +1,7 @@
 package me.jm3l.sectors;
 
 import me.jm3l.sectors.manager.ConfigManager;
+import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.FileUtils.SectorsFile;
 import me.jm3l.sectors.command.SCommand;
 import me.jm3l.sectors.command.wand.ClaimWand;
@@ -60,6 +61,10 @@ public final class Sectors extends JavaPlugin {
     @Override
     public void onEnable() {
         PacketEvents.getAPI().init();
+        
+        // Initialize services
+        ServiceManager.initializeServices(this);
+        
         this.claimToolEvents = new ClaimToolEvents(this);
         this.claimParticleTask = new ClaimParticleTask(this);
         this.events = new Events(this);

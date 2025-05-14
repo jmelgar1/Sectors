@@ -125,7 +125,7 @@ public class Sector implements ConfigurationSerializable {
         return this.claim;
     }
 
-    public void setClaim(Claim c, Player p) {
+    public void setClaim(Claim c) {
         this.claim = c;
     }
     public boolean hasClaim() {return this.claim != null;}

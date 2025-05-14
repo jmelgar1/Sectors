@@ -3,6 +3,7 @@ package me.jm3l.sectors.events;
 import me.jm3l.sectors.command.wand.util.ClaimToolInventoryUtilities;
 import me.jm3l.sectors.command.wand.util.ClaimToolPacketUtilities;
 import me.jm3l.sectors.manager.ConfigManager;
+import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.objects.Sector;
 import org.bukkit.ChatColor;
@@ -106,7 +107,7 @@ public class Events implements Listener {
     public void onScroll(PlayerItemHeldEvent e) {
         Player p = e.getPlayer();
         UUID pUUID = p.getUniqueId();
-        int currentDistance = plugin.getClaimParticleTask().getPlayerMarkerDistances().getOrDefault(pUUID, 5);
+        int currentDistance = ServiceManager.getMarkerService().getPlayerMarkerDistance(p, 5);
 
         boolean isScrollDown = (e.getNewSlot() == 0 && e.getPreviousSlot() == 8) || (e.getNewSlot() > e.getPreviousSlot() && !(e.getPreviousSlot() == 0 && e.getNewSlot() == 8));
 
@@ -116,7 +117,7 @@ public class Events implements Listener {
         currentDistance += scrollCount;
         scrollCounts.put(pUUID, 0);
         currentDistance = Math.max(ConfigManager.MIN_CLAIM_REACH, Math.min(currentDistance, ConfigManager.MAX_CLAIM_REACH));
-        plugin.getClaimParticleTask().getPlayerMarkerDistances().put(pUUID, currentDistance);
+        ServiceManager.getMarkerService().setPlayerMarkerDistance(p, currentDistance);
     }
 
     @EventHandler

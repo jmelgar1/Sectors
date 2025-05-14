@@ -1,57 +1,50 @@
 package me.jm3l.sectors.runnables;
 
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.command.wand.util.ClaimToolPacketUtilities;
-import me.jm3l.sectors.utilities.PacketPair;
-
-import org.bukkit.Bukkit;
+import me.jm3l.sectors.manager.ServiceManager;
+import me.jm3l.sectors.service.MarkerService;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
+/**
+ * This task is responsible for visualizing claim markers in real time.
+ * It only focuses on keeping markers updated, not on clearing positions or bounds.
+ */
 public class ClaimParticleTask extends BukkitRunnable {
-
-    private final Map<UUID, WrapperPlayServerSpawnEntity> playerMarkers = new HashMap<>();
-    public Map<UUID, WrapperPlayServerSpawnEntity> getPlayerMarkers() {return playerMarkers;}
-
-    private final Map<UUID, Integer> playerMarkerDistances = new HashMap<>();
-    public Map<UUID, Integer> getPlayerMarkerDistances() {return playerMarkerDistances;}
-
     private final Sectors plugin;
-    public ClaimParticleTask(Sectors plugin) {this.plugin = plugin;}
+    
+    public ClaimParticleTask(Sectors plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public void run() {
-        for (Player p : plugin.getServer().getOnlinePlayers()) {
-            if (plugin.getClaimToolEvents().getClaimModePlayers().containsKey(p.getUniqueId()) &&
-                    plugin.getClaimWand().isWand(p.getInventory().getItemInMainHand())) {
-
-                Location targetLocation = ClaimToolPacketUtilities.getTargetLocation(p, plugin);
-                WrapperPlayServerSpawnEntity marker = playerMarkers.get(p.getUniqueId());
-                PacketPair packetPair = plugin.getClaimToolEvents().getPlayerClaimPositions().get(p.getUniqueId());
-
-                if (marker == null) {
-                    WrapperPlayServerSpawnEntity newPacket = ClaimToolPacketUtilities.setMarkerPacket(targetLocation, p);
-                    if (newPacket != null) {
-                        playerMarkers.put(p.getUniqueId(), newPacket);
-                        Bukkit.broadcastMessage(playerMarkers.toString());
-                        plugin.getClaimToolEvents().getPlayerClaimPositions().computeIfAbsent(p.getUniqueId(), k -> new PacketPair(null, null));
-                    }
-                } else if (packetPair != null && (packetPair.getPacketOne() == null || packetPair.getPacketTwo() == null)) {
-                    ClaimToolPacketUtilities.teleportMarkerPacket(marker, targetLocation, p, plugin);
-                } else if (packetPair == null) {
-                    // Initialize a new packetPair for this player
-                    plugin.getClaimToolEvents().getPlayerClaimPositions().put(p.getUniqueId(), new PacketPair(null, null));
-                    ClaimToolPacketUtilities.teleportMarkerPacket(marker, targetLocation, p, plugin);
-                }
-            } else if (playerMarkers.containsKey(p.getUniqueId())) {
-                ClaimToolPacketUtilities.clearAllPositionsAndMarkers(p, true, plugin);
+        MarkerService markerService = ServiceManager.getMarkerService();
+        
+        for (Player player : plugin.getServer().getOnlinePlayers()) {
+            UUID playerUuid = player.getUniqueId();
+            
+            // Skip players who are viewing final claim bounds
+            if (markerService.isPlayerViewingFinalBounds(player)) {
+                continue;
             }
+            
+            // Only update markers for players in claim mode with wand in hand
+            if (plugin.getClaimToolEvents().getPlayersInClaimMode().containsKey(playerUuid) &&
+                    plugin.getClaimWand().isWand(player.getInventory().getItemInMainHand())) {
+                
+                // Get target location and update the marker
+                Location targetLocation = ClaimToolPacketUtilities.getTargetLocation(player, plugin);
+                markerService.updatePlayerMarker(player, targetLocation);
+            } 
+            // // If player has a marker but isn't in claim mode or isn't holding wand, remove markers
+            // else if (markerService.hasPlayerMarker(player)) {
+            //     ClaimToolPacketUtilities.clearAllPositionsAndMarkers(player, true, plugin);
+            // }
         }
     }
 }

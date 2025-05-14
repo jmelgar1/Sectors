@@ -13,6 +13,7 @@ import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.service.PlayerEntityService;
 import me.jm3l.sectors.utilities.VectorPair;
 import me.jm3l.sectors.utilities.nms.NmsRegistry;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -32,23 +33,27 @@ public class ClaimUtilities {
      * Shows glowing block outlines for claim boundaries
      * @param edgeLocations List of locations to show
      * @param p Player to show the outline to
-     * @param plugin Main plugin instance
      * @param playerEntityService Entity service
      * @param material Material to use for the outline (default is WHITE_STAINED_GLASS if null)
      */
     public static void showGlowingBounds(List<Location> edgeLocations, Player p, PlayerEntityService playerEntityService, Material material) {
         Material blockMaterial = material != null ? material : Material.WHITE_STAINED_GLASS;
         
+        // Debug: Log how many entities we're about to create
+        Bukkit.getLogger().info("Creating " + edgeLocations.size() + " outline blocks with " + blockMaterial.name() + " for player " + p.getName());
+        
         for (Location loc : edgeLocations) {
-            loc.add(0.5, 0, 0.5);
+            // Create a clone so we don't modify the original locations
+            Location locClone = loc.clone().add(0.5, 0, 0.5);
 
             int entityId = nextEntityId.getAndIncrement();
 
+            // Create the falling block entity (glowing glass block)
             WrapperPlayServerSpawnEntity spawnPacket = new WrapperPlayServerSpawnEntity(
                 entityId,
                 Optional.of(UUID.randomUUID()),
                 EntityTypes.FALLING_BLOCK,
-                new Vector3d(loc.getX(), loc.getY(), loc.getZ()),
+                new Vector3d(locClone.getX(), locClone.getY(), locClone.getZ()),
                 0.0f,
                 0.0f,
                 0.0f,
@@ -56,14 +61,17 @@ public class ClaimUtilities {
                 Optional.of(new Vector3d(0, 0, 0))
             );
 
+            // Add metadata to make it glow and have no gravity
             List<EntityData<?>> metadata = new ArrayList<>();
             metadata.add(new EntityData(0, EntityDataTypes.BYTE, (byte) 0x40)); // Glowing flag
             metadata.add(new EntityData(5, EntityDataTypes.BOOLEAN, true));    // No gravity
             WrapperPlayServerEntityMetadata metadataPacket = new WrapperPlayServerEntityMetadata(entityId, metadata);
 
+            // Send packets to the player
             PacketEvents.getAPI().getPlayerManager().sendPacket(p, spawnPacket);
             PacketEvents.getAPI().getPlayerManager().sendPacket(p, metadataPacket);
 
+            // Store entity ID for later removal
             playerEntityService.addEntityIDForPlayer(p, entityId);
         }
     }
@@ -115,7 +123,12 @@ public class ClaimUtilities {
 
     public static void removeGlowingBounds(Player p, Sectors plugin) {
         List<Integer> entityIDsForPlayer = ServiceManager.getPlayerEntityService().getEntityIDsForPlayer(p);
-        if (entityIDsForPlayer.isEmpty()) return;
+        if (entityIDsForPlayer.isEmpty()) {
+            Bukkit.getLogger().info("No bounds to remove for player " + p.getName());
+            return;
+        }
+
+        Bukkit.getLogger().info("Removing " + entityIDsForPlayer.size() + " bound entities for player " + p.getName());
 
         int[] entityIDs = entityIDsForPlayer.stream().mapToInt(Integer::intValue).toArray();
         WrapperPlayServerDestroyEntities destroyPacket = new WrapperPlayServerDestroyEntities(entityIDs);
@@ -123,5 +136,4 @@ public class ClaimUtilities {
 
         entityIDsForPlayer.clear();
     }
-    //refresh
 }

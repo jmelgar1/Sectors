@@ -29,9 +29,9 @@ public class ClaimToolEvents implements Listener {
     public ClaimToolEvents(Sectors plugin) {
         this.plugin = plugin;
     }
-    private final Map<UUID, Boolean> claimModePlayers = new HashMap<>();
-    public Map<UUID, Boolean> getClaimModePlayers(){
-        return this.claimModePlayers;
+    private final Map<UUID, Boolean> playersInClaimMode = new HashMap<>();
+    public Map<UUID, Boolean> getPlayersInClaimMode(){
+        return this.playersInClaimMode;
     }
 
     private final Map<UUID, PacketPair> playerClaimPositions = new HashMap<>();
@@ -42,7 +42,7 @@ public class ClaimToolEvents implements Listener {
         Player p = e.getPlayer();
         ItemStack item = p.getInventory().getItem(e.getNewSlot());
         if (plugin.getClaimWand().isWand(item)) {
-            claimModePlayers.put(p.getUniqueId(), true);
+            playersInClaimMode.put(p.getUniqueId(), true);
         }
     }
 
@@ -82,31 +82,26 @@ public class ClaimToolEvents implements Listener {
         ClaimSelection selection = plugin.getData().getSelection(p);
         if(packetPair != null) {
             if (packetPair.getPacketOne() == null || packetPair.getPacketTwo() == null) {
-                WrapperPlayServerSpawnEntity storedPacket = plugin.getClaimParticleTask().getPlayerMarkers().get(p.getUniqueId());
+                WrapperPlayServerSpawnEntity storedPacket = ServiceManager.getMarkerService().getPlayerMarker(p);
                 if (storedPacket != null) {
                     Location realLocation = ClaimToolPacketUtilities.getTargetLocation(p, plugin);
-                    
-                    Bukkit.broadcastMessage("Real Location: " + realLocation.toString());
-
                     if (packetPair.getPacketOne() == null && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)) {
                         selection.setPos1(realLocation);
                         plugin.getData().getSelections().put(p, selection);
 
                         WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p);
                         packetPair.setPacketOne(packet);
-                        p.sendMessage("Set position 1");
+                        p.sendMessage("Position 1 - " + realLocation.toString());
                     } else if (packetPair.getPacketTwo() == null && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)) {
                         selection.setPos2(realLocation);
                         plugin.getData().getSelections().put(p, selection);
 
                         WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p);
                         packetPair.setPacketTwo(packet);
-                        p.sendMessage("Set position 2");
+                        p.sendMessage("Position 2 - " + realLocation.toString());
                     }
 
                     if (!selection.pos1().isZero() && !selection.pos2().isZero()) {
-                        p.sendMessage("Pos1: " + selection.pos1().toString());
-                        p.sendMessage("Pos2: " + selection.pos2().toString());
                         ClaimUtilities.showGlowingBounds(selection.getEdgeLocations(), p, ServiceManager.getPlayerEntityService(), Material.LIME_STAINED_GLASS);
                     }
                 }

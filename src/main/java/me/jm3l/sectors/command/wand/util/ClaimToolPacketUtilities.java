@@ -6,6 +6,7 @@ import me.jm3l.sectors.manager.ConfigManager;
 import me.jm3l.sectors.Sectors;
 import me.jm3l.sectors.manager.ServiceManager;
 import me.jm3l.sectors.objects.claim.util.ClaimUtilities;
+import me.jm3l.sectors.service.MarkerService;
 import me.jm3l.sectors.utilities.PacketPair;
 
 import org.bukkit.Bukkit;
@@ -15,10 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
-import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityTeleport;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
@@ -64,14 +62,19 @@ public static WrapperPlayServerSpawnEntity setMarkerPacket(Location location, Pl
         int entityId = packet.getEntityId();
         WrapperPlayServerDestroyEntities destroyPacket = new WrapperPlayServerDestroyEntities(entityId);
         PacketEvents.getAPI().getPlayerManager().sendPacket(p, destroyPacket);
-        plugin.getClaimParticleTask().getPlayerMarkers().remove(p.getUniqueId());
+        
+        // Use MarkerService to remove the player's marker
+        MarkerService markerService = ServiceManager.getMarkerService();
+        markerService.removePlayerMarker(p);
     }
 
     public static void teleportMarkerPacket(WrapperPlayServerSpawnEntity packet, Location newLocation, Player p, Sectors plugin) {
+        MarkerService markerService = ServiceManager.getMarkerService();
+        
         if (packet == null) {
             WrapperPlayServerSpawnEntity newPacket = setMarkerPacket(newLocation, p);
             if (newPacket != null) {
-                plugin.getClaimParticleTask().getPlayerMarkers().put(p.getUniqueId(), newPacket);
+                markerService.setPlayerMarker(p, newPacket);
             }
             return;
         }
@@ -101,31 +104,44 @@ public static WrapperPlayServerSpawnEntity setMarkerPacket(Location location, Pl
         } catch (Exception e) {
             WrapperPlayServerSpawnEntity newPacket = setMarkerPacket(newLocation, p);
             if (newPacket != null) {
-                plugin.getClaimParticleTask().getPlayerMarkers().put(p.getUniqueId(), newPacket);
+                markerService.setPlayerMarker(p, newPacket);
             }
             e.printStackTrace();
         }
     }
 
     public static Location getTargetLocation(Player p, Sectors plugin) {
-        int distance = plugin.getClaimParticleTask().getPlayerMarkerDistances().getOrDefault(p.getUniqueId(), ConfigManager.DEFAULT_REACH);
+        MarkerService markerService = ServiceManager.getMarkerService();
+        int distance = markerService.getPlayerMarkerDistance(p, ConfigManager.DEFAULT_REACH);
         Vector direction = p.getLocation().getDirection();
         return p.getEyeLocation().add(direction.multiply(distance));
     }
 
+    public static void removePlayerFromClaimMode(Player p, Sectors plugin) {
+        UUID pUUID = p.getUniqueId();
+        plugin.getClaimToolEvents().getPlayersInClaimMode().remove(pUUID);
+        Bukkit.broadcastMessage("Removed player from claim mode");
+    }
+
     public static void clearAllPositionsAndMarkers(Player p, Boolean removeFromClaimMode, Sectors plugin) {
         UUID pUUID = p.getUniqueId();
-        plugin.getClaimParticleTask().getPlayerMarkerDistances().remove(pUUID);
+        MarkerService markerService = ServiceManager.getMarkerService();
+        
+        // Remove marker distances
+        markerService.removePlayerMarkerDistance(p);
 
-        WrapperPlayServerSpawnEntity marker = plugin.getClaimParticleTask().getPlayerMarkers().get(pUUID);
+        // Remove marker entities
+        WrapperPlayServerSpawnEntity marker = markerService.getPlayerMarker(p);
         if (marker != null) {
             removeMarketPacket(p, marker, plugin);
         }
 
+        // Remove selection if present
         if (plugin.getData().getSelection(p) != null) {
             plugin.getData().getSelections().remove(p);
         }
 
+        // Handle position markers
         PacketPair packetPair = plugin.getClaimToolEvents().getPlayerClaimPositions().get(pUUID);
         if (packetPair != null) {
             if (packetPair.getPacketOne() != null) {
@@ -137,18 +153,16 @@ public static WrapperPlayServerSpawnEntity setMarkerPacket(Location location, Pl
             plugin.getClaimToolEvents().getPlayerClaimPositions().remove(pUUID);
         }
 
-        if (!ServiceManager.getPlayerEntityService().getEntityIDsForPlayer(p).isEmpty()) {
+        // Only remove bounds if we're removing from claim mode completely
+        // and player is not viewing final claim bounds
+        if (removeFromClaimMode && !markerService.isPlayerViewingFinalBounds(p) && 
+            !ServiceManager.getPlayerEntityService().getEntityIDsForPlayer(p).isEmpty()) {
             ClaimUtilities.removeGlowingBounds(p, plugin);
         }
 
+        // Remove from claim mode if requested
         if (removeFromClaimMode) {
-            plugin.getClaimToolEvents().getClaimModePlayers().remove(pUUID);
-            p.sendMessage("You have been removed from claim mode!");
-        } else {
-            WrapperPlayServerSpawnEntity markerPacket = plugin.getClaimParticleTask().getPlayerMarkers().get(pUUID);
-            if (markerPacket != null) {
-                teleportMarkerPacket(markerPacket, getTargetLocation(p, plugin), p, plugin);
-            }
+            removePlayerFromClaimMode(p, plugin);
         }
     }
 }
