@@ -1,0 +1,238 @@
+package me.jm3l.sectors.claim;
+
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
+import com.github.retrooper.packetevents.util.Vector3d;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
+import me.jm3l.sectors.Sectors;
+import me.jm3l.sectors.shared.service.ServiceManager;
+import me.jm3l.sectors.shared.service.PlayerEntityService;
+import me.jm3l.sectors.shared.util.VectorPair;
+import me.jm3l.sectors.shared.util.nms.NmsRegistry;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class ClaimUtilities {
+    private static final AtomicInteger nextEntityId = new AtomicInteger(1000000);
+
+    public static void showGlowingBounds(List<Location> edgeLocations, Player p, Sectors plugin, PlayerEntityService playerEntityService) {
+        for (Location loc : edgeLocations) {
+            // Center the falling block entity in the block space for proper rendering
+            double x = loc.getX() + 0.5;
+            double y = loc.getY();
+            double z = loc.getZ() + 0.5;
+
+            int entityId = nextEntityId.getAndIncrement();
+
+            WrapperPlayServerSpawnEntity spawnPacket = new WrapperPlayServerSpawnEntity(
+                entityId,
+                Optional.of(UUID.randomUUID()),
+                EntityTypes.FALLING_BLOCK,
+                new Vector3d(x, y, z),
+                0.0f,
+                0.0f,
+                0.0f,
+                NmsRegistry.getBlockId(Material.WHITE_STAINED_GLASS.createBlockData()),
+                Optional.of(new Vector3d(0, 0, 0))
+            );
+
+            List<EntityData<?>> metadata = new ArrayList<>();
+            metadata.add(new EntityData(0, EntityDataTypes.BYTE, (byte) 0x40)); // Glowing flag
+            metadata.add(new EntityData(5, EntityDataTypes.BOOLEAN, true));    // No gravity
+            WrapperPlayServerEntityMetadata metadataPacket = new WrapperPlayServerEntityMetadata(entityId, metadata);
+
+            PacketEvents.getAPI().getPlayerManager().sendPacket(p, spawnPacket);
+            PacketEvents.getAPI().getPlayerManager().sendPacket(p, metadataPacket);
+
+            playerEntityService.addEntityIDForPlayer(p, entityId);
+        }
+    }
+
+    public static List<Location> calculateEdgeLocations(Vector start, Vector end, World world) {
+        List<Location> locations = new ArrayList<>();
+
+        int x = start.getBlockX();
+        int y = start.getBlockY();
+        int z = start.getBlockZ();
+        int x2 = end.getBlockX();
+        int y2 = end.getBlockY();
+        int z2 = end.getBlockZ();
+
+        // BoundingBox uses exclusive maximums, so subtract 1 to get the actual last block
+        int maxX = x2 - 1;
+        int maxY = y2 - 1;
+        int maxZ = z2 - 1;
+
+        // Top and bottom edges (horizontal lines)
+        for (int currentX = x; currentX <= maxX; currentX++) {
+            locations.add(new Location(world, currentX, y, z));        // bottom north
+            locations.add(new Location(world, currentX, y, maxZ));     // bottom south
+            locations.add(new Location(world, currentX, maxY, z));     // top north
+            locations.add(new Location(world, currentX, maxY, maxZ));  // top south
+        }
+        for (int currentZ = z; currentZ <= maxZ; currentZ++) {
+            locations.add(new Location(world, x, y, currentZ));        // bottom west
+            locations.add(new Location(world, maxX, y, currentZ));     // bottom east
+            locations.add(new Location(world, x, maxY, currentZ));     // top west
+            locations.add(new Location(world, maxX, maxY, currentZ));  // top east
+        }
+        // Vertical edges (corner pillars)
+        for (int currentY = y; currentY <= maxY; currentY++) {
+            locations.add(new Location(world, x, currentY, z));        // northwest corner
+            locations.add(new Location(world, maxX, currentY, z));     // northeast corner
+            locations.add(new Location(world, x, currentY, maxZ));     // southwest corner
+            locations.add(new Location(world, maxX, currentY, maxZ));  // southeast corner
+        }
+
+        return locations;
+    }
+
+    public static VectorPair vectorTransformation(Vector vector1, Vector vector2) {
+        int x = Math.min(vector1.getBlockX(), vector2.getBlockX());
+        int y = Math.min(vector1.getBlockY(), vector2.getBlockY());
+        int z = Math.min(vector1.getBlockZ(), vector2.getBlockZ());
+        int x2 = Math.max(vector1.getBlockX(), vector2.getBlockX());
+        int y2 = Math.max(vector1.getBlockY(), vector2.getBlockY());
+        int z2 = Math.max(vector1.getBlockZ(), vector2.getBlockZ());
+
+        return new VectorPair(new Vector(x, y, z), new Vector(x2, y2, z2));
+    }
+
+    public static void removeGlowingBounds(Player p, Sectors plugin) {
+        List<Integer> entityIDsForPlayer = ServiceManager.getPlayerEntityService().getEntityIDsForPlayer(p);
+        if (entityIDsForPlayer.isEmpty()) return;
+
+        int[] entityIDs = entityIDsForPlayer.stream().mapToInt(Integer::intValue).toArray();
+        WrapperPlayServerDestroyEntities destroyPacket = new WrapperPlayServerDestroyEntities(entityIDs);
+        PacketEvents.getAPI().getPlayerManager().sendPacket(p, destroyPacket);
+
+        entityIDsForPlayer.clear();
+    }
+
+    /**
+     * Initializes a claim by generating a platform if needed and finding a safe home location
+     * @param claim The claim to initialize
+     * @return Safe home location, or null if none could be found
+     */
+    public static Location initializeClaimHome(Claim claim) {
+        World world = claim.getWorld();
+        int minX = claim.getMinX();
+        int minY = claim.getMinY();
+        int minZ = claim.getMinZ();
+        int maxX = claim.getMaxX();
+        int maxY = claim.getMaxY();
+        int maxZ = claim.getMaxZ();
+
+        // Calculate center coordinates
+        int centerX = (minX + maxX) / 2;
+        int centerZ = (minZ + maxZ) / 2;
+
+        // Check if there are any solid blocks in the entire claim
+        Location firstSolidLocation = findFirstSolidBlock(world, minX, minY, minZ, maxX, maxY, maxZ);
+
+        // If no solid blocks found, generate 3x3 glass platform at bottom center
+        if (firstSolidLocation == null) {
+            generatePlatform(world, centerX, centerZ, minY);
+            // Return spawn location on center of platform (slightly above glass)
+            return new Location(world, centerX + 0.5, minY + 1, centerZ + 0.5);
+        }
+
+        // If solid blocks exist, return the first safe location found
+        return firstSolidLocation;
+    }
+
+    /**
+     * Generates a 3x3 glass platform centered at the given coordinates
+     * @param world The world to generate in
+     * @param centerX Center X coordinate
+     * @param centerZ Center Z coordinate
+     * @param y Y level to generate at
+     */
+    private static void generatePlatform(World world, int centerX, int centerZ, int y) {
+        for (int x = centerX - 1; x <= centerX + 1; x++) {
+            for (int z = centerZ - 1; z <= centerZ + 1; z++) {
+                Location platformLoc = new Location(world, x, y, z);
+                world.getBlockAt(platformLoc).setType(Material.GLASS);
+            }
+        }
+    }
+
+    /**
+     * Checks if the claim has any solid blocks
+     * @return true if solid blocks exist, false otherwise
+     */
+    public static boolean hasSolidBlocks(Claim claim) {
+        return findFirstSolidBlock(
+            claim.getWorld(),
+            claim.getMinX(),
+            claim.getMinY(),
+            claim.getMinZ(),
+            claim.getMaxX(),
+            claim.getMaxY(),
+            claim.getMaxZ()
+        ) != null;
+    }
+
+    /**
+     * Scans the claim area for the first solid block and returns a safe spawn location above it
+     * @return Safe spawn location, or null if no solid blocks found
+     */
+    private static Location findFirstSolidBlock(World world, int minX, int minY, int minZ,
+                                                 int maxX, int maxY, int maxZ) {
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
+                    Location loc = new Location(world, x, y, z);
+                    Material blockType = world.getBlockAt(loc).getType();
+
+                    if (blockType.isSolid()) {
+                        // Find a safe spawn location on top of this solid block
+                        return findSafeSpawnLocation(world, x, y, z, maxY);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find a safe spawn location on or above a solid block
+     * Looks for a 2-block-high air space above a solid block
+     * @return Safe spawn location centered on the block
+     */
+    private static Location findSafeSpawnLocation(World world, int x, int y, int z, int maxY) {
+        // Search upward for a safe 2-block-high air space above a solid block
+        for (int checkY = y + 1; checkY <= maxY; checkY++) {
+            Location feet = new Location(world, x, checkY, z);
+            Location head = new Location(world, x, checkY + 1, z);
+
+            Material feetBlock = world.getBlockAt(feet).getType();
+            Material headBlock = world.getBlockAt(head).getType();
+            Material below = world.getBlockAt(new Location(world, x, checkY - 1, z)).getType();
+
+            // Check if there's a solid block below and 2 air blocks above
+            if (below.isSolid() && feetBlock == Material.AIR && headBlock == Material.AIR) {
+                // Return centered location
+                return new Location(world, x + 0.5, checkY, z + 0.5);
+            }
+        }
+
+        // Fallback: return location on top of the block
+        return new Location(world, x + 0.5, y + 1, z + 0.5);
+    }
+
+    //refresh
+}

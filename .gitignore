@@ -128,4 +128,5 @@ bin/
 deploy-and-run.ps1
 run-server/
 .vscode/
+.claude/
 

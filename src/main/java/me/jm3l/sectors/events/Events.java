@@ -1,10 +1,13 @@
 package me.jm3l.sectors.events;
 
-import me.jm3l.sectors.command.wand.util.ClaimToolInventoryUtilities;
-import me.jm3l.sectors.command.wand.util.ClaimToolPacketUtilities;
-import me.jm3l.sectors.manager.ConfigManager;
+import me.jm3l.sectors.claim.ClaimUtilities;
+import me.jm3l.sectors.claim.wand.ClaimToolInventoryUtilities;
+import me.jm3l.sectors.claim.wand.ClaimToolPacketUtilities;
+import me.jm3l.sectors.core.config.ConfigManager;
 import me.jm3l.sectors.Sectors;
-import me.jm3l.sectors.objects.Sector;
+import me.jm3l.sectors.sector.Sector;
+import me.jm3l.sectors.shared.service.ServiceManager;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -150,10 +153,23 @@ public class Events implements Listener {
         if (newSector != null && !newSector.equals(currentSector)) {
             p.sendPlainMessage(ChatColor.YELLOW + "You have entered the claim of " + newSector.getName() + ".");
             playerCurrentSector.put(playerId, newSector);
+
+            // Highlight claim boundaries while inside
+            ClaimUtilities.showGlowingBounds(
+                newSector.getClaim().getEdgeLocations(),
+                p,
+                plugin,
+                ServiceManager.getPlayerEntityService()
+            );
         }
         else if (currentSector != null && (newSector == null || !newSector.equals(currentSector))) {
             p.sendMessage(ChatColor.YELLOW + "You have left the claim of " + currentSector.getName() + ".");
             playerCurrentSector.remove(playerId);
+
+            // Remove claim boundaries after 3 seconds
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                ClaimUtilities.removeGlowingBounds(p, plugin);
+            }, 60L);
         }
     }
 }
