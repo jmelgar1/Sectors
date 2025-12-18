@@ -21,20 +21,28 @@ public class ServerVersion {
      * @return true if the current version is greater, false otherwise.
      */
     public static boolean isGreaterThan(int major, int minor, int patch) {
-        String version = getServerVersion();
-        // Assuming version format is "v1_XX_RX", where XX is the major version and R is the minor/revision
-        String[] parts = version.split("_");
+        // For modern Paper versions (1.20.5+), the version format changed
+        // Use the actual Minecraft version from Bukkit
+        String mcVersion = Bukkit.getBukkitVersion(); // e.g., "1.21.11-R0.1-SNAPSHOT"
+
         try {
-            int currentMajor = Integer.parseInt(parts[1]);
-            int currentMinor = Integer.parseInt(parts[2].substring(1));
-            if (currentMajor > major) {
-                return true;
-            } else if (currentMajor == major) {
-                return currentMinor > minor || (currentMinor == minor && patch == 0);
+            // Parse Minecraft version (e.g., "1.21.11" from "1.21.11-R0.1-SNAPSHOT")
+            String[] versionParts = mcVersion.split("-")[0].split("\\.");
+
+            if (versionParts.length >= 2) {
+                int currentMajor = Integer.parseInt(versionParts[0]); // Should be 1
+                int currentMinor = Integer.parseInt(versionParts[1]); // e.g., 21
+                int currentPatch = versionParts.length >= 3 ? Integer.parseInt(versionParts[2]) : 0; // e.g., 11
+
+                // Compare major.minor.patch (e.g., 1.21.11 vs 1.17.1)
+                if (currentMinor > minor) {
+                    return true;
+                } else if (currentMinor == minor) {
+                    return currentPatch > patch;
+                }
             }
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            // Handle exception
         }
         return false;
     }

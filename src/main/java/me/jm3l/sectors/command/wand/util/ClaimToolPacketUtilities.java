@@ -94,7 +94,20 @@ public class ClaimToolPacketUtilities {
                 false // on ground
             );
             PacketEvents.getAPI().getPlayerManager().sendPacket(p, teleportPacket);
-            // Note: Not replacing the packet in the map, as the original spawn packet is still needed
+
+            // Create updated spawn packet with new position to keep stored position in sync
+            WrapperPlayServerSpawnEntity updatedPacket = new WrapperPlayServerSpawnEntity(
+                entityId,
+                packet.getUUID(),
+                packet.getEntityType(),
+                new Vector3d(newLocation.getX(), newLocation.getY(), newLocation.getZ()),
+                packet.getPitch(),
+                packet.getYaw(),
+                packet.getHeadYaw(),
+                packet.getData(),
+                packet.getVelocity()
+            );
+            plugin.getClaimParticleTask().getPlayerMarkers().put(p.getUniqueId(), updatedPacket);
         } catch (Exception e) {
             WrapperPlayServerSpawnEntity newPacket = setMarkerPacket(newLocation, p, plugin);
             if (newPacket != null) {

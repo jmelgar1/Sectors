@@ -1,6 +1,6 @@
 plugins {
   `java-library`
-  id("io.papermc.paperweight.userdev") version "2.0.0-beta.16"
+  id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
   id("xyz.jpenilla.run-paper") version "2.2.3"
 }
 
@@ -22,7 +22,7 @@ repositories {
 dependencies {
   implementation("org.projectlombok:lombok:1.18.26")
     // Use the paperDevBundle for PaperMC development
-  paperweight.paperDevBundle("1.21.5-R0.1-SNAPSHOT")
+  paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
 
   // Additional dependencies
   //compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
@@ -32,7 +32,7 @@ dependencies {
 tasks {
   // Configure reobfJar to run when invoking the build task
   assemble {
-    dependsOn(reobfJar)
+    dependsOn(jar)
   }
 
   compileJava {
@@ -76,10 +76,9 @@ tasks.register("deployToServer") {
   dependsOn("build")
   doLast {
     copy {
-      from("build/libs/Sectors-unspecified-reobf.jar")
-      into("run/plugins")
-      rename { "Sectors.jar" } // Use a consistent name
+      from("build/libs/Sectors.jar")
+      into("/home/melgar/spigot-server/plugins")
     }
-    println("Plugin deployed to run/plugins directory")
+    println("Plugin deployed to /home/melgar/spigot-server/plugins directory")
   }
 }
