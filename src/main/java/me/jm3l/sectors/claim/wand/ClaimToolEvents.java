@@ -85,21 +85,53 @@ public class ClaimToolEvents implements Listener {
                     double x = storedPacket.getPosition().getX();
                     double y = storedPacket.getPosition().getY();
                     double z = storedPacket.getPosition().getZ();
-                    Location realLocation = new Location(p.getLocation().getWorld(), x, y, z);
+                    Location packetLocation = new Location(p.getLocation().getWorld(), x, y, z);
+
+                    // Convert to block coordinates for consistent boundary calculation
+                    Location blockLocation = new Location(
+                        packetLocation.getWorld(),
+                        packetLocation.getBlockX(),
+                        packetLocation.getBlockY(),
+                        packetLocation.getBlockZ()
+                    );
 
                     if (packetPair.getPacketOne() == null && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)) {
-                        selection.setPos1(realLocation);
+                        // Validate position is not in or near another claim
+                        if (!ClaimUtilities.isValidClaimPosition(blockLocation, plugin, 30)) {
+                            p.sendMessage("§cCannot set position: Too close to or inside another claim (minimum 30 blocks required)");
+                            return;
+                        }
+
+                        selection.setPos1(blockLocation);
                         plugin.getData().getSelections().put(p, selection);
 
-                        WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p, plugin);
+                        WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(packetLocation, p, plugin);
                         packetPair.setPacketOne(packet);
+
+                        // DEBUG
+                        plugin.getLogger().info("=== POSITION 1 DEBUG ===");
+                        plugin.getLogger().info("Marker packet position: " + x + ", " + y + ", " + z);
+                        plugin.getLogger().info("Block position stored: " + blockLocation.getBlockX() + ", " + blockLocation.getBlockY() + ", " + blockLocation.getBlockZ());
+
                         p.sendMessage("Set position 1");
                     } else if (packetPair.getPacketTwo() == null && (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK)) {
-                        selection.setPos2(realLocation);
+                        // Validate position is not in or near another claim
+                        if (!ClaimUtilities.isValidClaimPosition(blockLocation, plugin, 30)) {
+                            p.sendMessage("§cCannot set position: Too close to or inside another claim (minimum 30 blocks required)");
+                            return;
+                        }
+
+                        selection.setPos2(blockLocation);
                         plugin.getData().getSelections().put(p, selection);
 
-                        WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(realLocation, p, plugin);
+                        WrapperPlayServerSpawnEntity packet = ClaimToolPacketUtilities.setMarkerPacket(packetLocation, p, plugin);
                         packetPair.setPacketTwo(packet);
+
+                        // DEBUG
+                        plugin.getLogger().info("=== POSITION 2 DEBUG ===");
+                        plugin.getLogger().info("Marker packet position: " + x + ", " + y + ", " + z);
+                        plugin.getLogger().info("Block position stored: " + blockLocation.getBlockX() + ", " + blockLocation.getBlockY() + ", " + blockLocation.getBlockZ());
+
                         p.sendMessage("Set position 2");
                     }
 

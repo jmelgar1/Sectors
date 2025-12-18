@@ -1,6 +1,7 @@
 package me.jm3l.sectors.events;
 
 import me.jm3l.sectors.claim.ClaimUtilities;
+import me.jm3l.sectors.claim.commands.RadarCommand;
 import me.jm3l.sectors.claim.wand.ClaimToolInventoryUtilities;
 import me.jm3l.sectors.claim.wand.ClaimToolPacketUtilities;
 import me.jm3l.sectors.core.config.ConfigManager;
@@ -32,6 +33,7 @@ public class Events implements Listener {
     private final Map<UUID, ItemStack[]> savedHotbars = new HashMap<>();
     public Map<UUID, ItemStack[]> getSavedHotbars() {return this.savedHotbars;}
     private final Map<UUID, Integer> scrollCounts = new HashMap<>();
+    private final Map<UUID, org.bukkit.scheduler.BukkitTask> boundaryRemovalTasks = new HashMap<>();
 
     private boolean isActionLegal(Player player, Location event){
         Sector playerSec = plugin.getData().getSector(player);
@@ -154,22 +156,46 @@ public class Events implements Listener {
             p.sendPlainMessage(ChatColor.YELLOW + "You have entered the claim of " + newSector.getName() + ".");
             playerCurrentSector.put(playerId, newSector);
 
-            // Highlight claim boundaries while inside
-            ClaimUtilities.showGlowingBounds(
-                newSector.getClaim().getEdgeLocations(),
-                p,
-                plugin,
-                ServiceManager.getPlayerEntityService()
-            );
+            // Only show boundaries if radar is NOT active
+            if (!RadarCommand.isRadarActive(playerId)) {
+                // Cancel any pending removal task
+                org.bukkit.scheduler.BukkitTask removalTask = boundaryRemovalTasks.remove(playerId);
+                if (removalTask != null) {
+                    removalTask.cancel();
+                }
+
+                // Remove any existing boundaries before showing new ones
+                ClaimUtilities.removeGlowingBounds(p, plugin);
+
+                // Determine boundary color based on sector ownership
+                Sector playerSector = plugin.getData().getSector(p);
+                org.bukkit.Material boundaryMaterial = (playerSector != null && playerSector.equals(newSector))
+                    ? org.bukkit.Material.GREEN_STAINED_GLASS
+                    : org.bukkit.Material.RED_STAINED_GLASS;
+
+                // Highlight claim boundaries while inside
+                ClaimUtilities.showGlowingBounds(
+                    newSector.getClaim().getEdgeLocations(),
+                    p,
+                    plugin,
+                    ServiceManager.getPlayerEntityService(),
+                    boundaryMaterial
+                );
+            }
         }
         else if (currentSector != null && (newSector == null || !newSector.equals(currentSector))) {
             p.sendMessage(ChatColor.YELLOW + "You have left the claim of " + currentSector.getName() + ".");
             playerCurrentSector.remove(playerId);
 
-            // Remove claim boundaries after 3 seconds
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                ClaimUtilities.removeGlowingBounds(p, plugin);
-            }, 60L);
+            // Only schedule removal if radar is NOT active
+            if (!RadarCommand.isRadarActive(playerId)) {
+                // Schedule boundary removal after 3 seconds
+                org.bukkit.scheduler.BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    ClaimUtilities.removeGlowingBounds(p, plugin);
+                    boundaryRemovalTasks.remove(playerId);
+                }, 60L);
+                boundaryRemovalTasks.put(playerId, task);
+            }
         }
     }
 }

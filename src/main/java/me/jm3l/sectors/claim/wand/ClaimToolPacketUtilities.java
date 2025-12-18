@@ -20,12 +20,54 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityTeleport;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerTeams;
+import com.github.retrooper.packetevents.protocol.player.TextureProperty;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClaimToolPacketUtilities {
     private static final AtomicInteger nextEntityId = new AtomicInteger(1000000);
+    private static final String VALID_TEAM_NAME = "claim_valid";
+    private static final String INVALID_TEAM_NAME = "claim_invalid";
+
+    /**
+     * Updates the marker color based on position validity
+     */
+    public static void updateMarkerColor(Player p, UUID entityUUID, boolean isValid) {
+        String teamName = isValid ? VALID_TEAM_NAME : INVALID_TEAM_NAME;
+        NamedTextColor color = isValid ? NamedTextColor.GREEN : NamedTextColor.RED;
+
+        // Create team with color
+        WrapperPlayServerTeams.ScoreBoardTeamInfo teamInfo = new WrapperPlayServerTeams.ScoreBoardTeamInfo(
+            Component.text(teamName),
+            Component.empty(),
+            Component.empty(),
+            WrapperPlayServerTeams.NameTagVisibility.NEVER,
+            WrapperPlayServerTeams.CollisionRule.NEVER,
+            color,
+            WrapperPlayServerTeams.OptionData.NONE
+        );
+
+        // Create or update team
+        WrapperPlayServerTeams createTeam = new WrapperPlayServerTeams(
+            teamName,
+            WrapperPlayServerTeams.TeamMode.CREATE,
+            Optional.of(teamInfo)
+        );
+        PacketEvents.getAPI().getPlayerManager().sendPacket(p, createTeam);
+
+        // Add entity to team by UUID
+        WrapperPlayServerTeams addToTeam = new WrapperPlayServerTeams(
+            teamName,
+            WrapperPlayServerTeams.TeamMode.ADD_ENTITIES,
+            Optional.empty(),
+            entityUUID.toString()
+        );
+        PacketEvents.getAPI().getPlayerManager().sendPacket(p, addToTeam);
+    }
 
     public static WrapperPlayServerSpawnEntity setMarkerPacket(Location location, Player p, Sectors plugin) {
         World world = location.getWorld();
@@ -52,6 +94,10 @@ public class ClaimToolPacketUtilities {
         metadataList.add(flagsData);
         WrapperPlayServerEntityMetadata metadataPacket = new WrapperPlayServerEntityMetadata(entityId, metadataList);
         PacketEvents.getAPI().getPlayerManager().sendPacket(p, metadataPacket);
+
+        // Set initial color based on position validity
+        boolean isValid = ClaimUtilities.isValidClaimPosition(location, plugin, 30);
+        updateMarkerColor(p, entityUUID, isValid);
 
         return spawnPacket;
     }
@@ -94,6 +140,12 @@ public class ClaimToolPacketUtilities {
                 false // on ground
             );
             PacketEvents.getAPI().getPlayerManager().sendPacket(p, teleportPacket);
+
+            // Update color based on new position validity
+            boolean isValid = ClaimUtilities.isValidClaimPosition(newLocation, plugin, 30);
+            if (packet.getUUID().isPresent()) {
+                updateMarkerColor(p, packet.getUUID().get(), isValid);
+            }
 
             // Create updated spawn packet with new position to keep stored position in sync
             WrapperPlayServerSpawnEntity updatedPacket = new WrapperPlayServerSpawnEntity(

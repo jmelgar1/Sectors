@@ -29,6 +29,10 @@ public class ClaimUtilities {
     private static final AtomicInteger nextEntityId = new AtomicInteger(1000000);
 
     public static void showGlowingBounds(List<Location> edgeLocations, Player p, Sectors plugin, PlayerEntityService playerEntityService) {
+        showGlowingBounds(edgeLocations, p, plugin, playerEntityService, Material.WHITE_STAINED_GLASS);
+    }
+
+    public static void showGlowingBounds(List<Location> edgeLocations, Player p, Sectors plugin, PlayerEntityService playerEntityService, Material material) {
         for (Location loc : edgeLocations) {
             // Center the falling block entity in the block space for proper rendering
             double x = loc.getX() + 0.5;
@@ -45,7 +49,7 @@ public class ClaimUtilities {
                 0.0f,
                 0.0f,
                 0.0f,
-                NmsRegistry.getBlockId(Material.WHITE_STAINED_GLASS.createBlockData()),
+                NmsRegistry.getBlockId(material.createBlockData()),
                 Optional.of(new Vector3d(0, 0, 0))
             );
 
@@ -75,6 +79,14 @@ public class ClaimUtilities {
         int maxX = x2 - 1;
         int maxY = y2 - 1;
         int maxZ = z2 - 1;
+
+        // DEBUG
+        System.out.println("=== BOUNDARY CALCULATION DEBUG ===");
+        System.out.println("Input start vector: " + x + ", " + y + ", " + z);
+        System.out.println("Input end vector: " + x2 + ", " + y2 + ", " + z2);
+        System.out.println("Calculated corners (after -1): maxX=" + maxX + ", maxY=" + maxY + ", maxZ=" + maxZ);
+        System.out.println("Corner 1 (min): " + x + ", " + y + ", " + z);
+        System.out.println("Corner 2 (max): " + maxX + ", " + maxY + ", " + maxZ);
 
         // Top and bottom edges (horizontal lines)
         for (int currentX = x; currentX <= maxX; currentX++) {
@@ -107,6 +119,13 @@ public class ClaimUtilities {
         int x2 = Math.max(vector1.getBlockX(), vector2.getBlockX());
         int y2 = Math.max(vector1.getBlockY(), vector2.getBlockY());
         int z2 = Math.max(vector1.getBlockZ(), vector2.getBlockZ());
+
+        // DEBUG
+        System.out.println("=== VECTOR TRANSFORMATION DEBUG ===");
+        System.out.println("Vector1 input: " + vector1.getBlockX() + ", " + vector1.getBlockY() + ", " + vector1.getBlockZ());
+        System.out.println("Vector2 input: " + vector2.getBlockX() + ", " + vector2.getBlockY() + ", " + vector2.getBlockZ());
+        System.out.println("Min (output start): " + x + ", " + y + ", " + z);
+        System.out.println("Max (output end): " + x2 + ", " + y2 + ", " + z2);
 
         return new VectorPair(new Vector(x, y, z), new Vector(x2, y2, z2));
     }
@@ -232,6 +251,53 @@ public class ClaimUtilities {
 
         // Fallback: return location on top of the block
         return new Location(world, x + 0.5, y + 1, z + 0.5);
+    }
+
+    /**
+     * Checks if a location is inside or within a certain distance of any existing claim
+     * @param location Location to check
+     * @param plugin Plugin instance to access sector data
+     * @param minDistance Minimum distance required from existing claims
+     * @return true if location is valid (not in or too close to existing claims), false otherwise
+     */
+    public static boolean isValidClaimPosition(Location location, Sectors plugin, int minDistance) {
+        for (me.jm3l.sectors.sector.Sector s : plugin.getData().getSectors()) {
+            if (!s.hasClaim()) continue;
+
+            Claim existingClaim = s.getClaim();
+
+            // Check if location is inside the claim
+            if (existingClaim.containsLocation(location)) {
+                return false;
+            }
+
+            // Check distance to claim boundaries
+            int claimMinX = existingClaim.getMinX();
+            int claimMinY = existingClaim.getMinY();
+            int claimMinZ = existingClaim.getMinZ();
+            int claimMaxX = existingClaim.getMaxX();
+            int claimMaxY = existingClaim.getMaxY();
+            int claimMaxZ = existingClaim.getMaxZ();
+
+            // Calculate closest point on the claim to the location
+            int closestX = Math.max(claimMinX, Math.min(location.getBlockX(), claimMaxX));
+            int closestY = Math.max(claimMinY, Math.min(location.getBlockY(), claimMaxY));
+            int closestZ = Math.max(claimMinZ, Math.min(location.getBlockZ(), claimMaxZ));
+
+            // Calculate distance
+            double distance = location.distance(new Location(
+                location.getWorld(),
+                closestX,
+                closestY,
+                closestZ
+            ));
+
+            if (distance < minDistance) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     //refresh

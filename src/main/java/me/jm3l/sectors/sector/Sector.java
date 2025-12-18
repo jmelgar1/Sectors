@@ -246,7 +246,13 @@ public class Sector implements ConfigurationSerializable {
             sendInfoMessage(p, "Claim start: ", String.valueOf(this.claim.start()), claimColor);
             sendInfoMessage(p, "Claim end: ", String.valueOf(this.claim.end()), claimColor);
             if (this.claim.getBounds().contains(p.getLocation().toVector())) {
-                ClaimUtilities.showGlowingBounds(this.claim.getEdgeLocations(), p, plugin, ServiceManager.getPlayerEntityService());
+                // Determine boundary color based on sector ownership
+                Sector playerSector = plugin.getData().getSector(p);
+                org.bukkit.Material boundaryMaterial = (playerSector != null && playerSector.equals(this))
+                    ? org.bukkit.Material.GREEN_STAINED_GLASS
+                    : org.bukkit.Material.RED_STAINED_GLASS;
+
+                ClaimUtilities.showGlowingBounds(this.claim.getEdgeLocations(), p, plugin, ServiceManager.getPlayerEntityService(), boundaryMaterial);
             }
         } else {
             sendInfoMessage(p, "Claim: ", "This sector does not have a claim.", noClaimColor);
