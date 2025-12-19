@@ -206,25 +206,56 @@ public class ClaimUtilities {
     }
 
     /**
-     * Scans the claim area for the first solid block and returns a safe spawn location above it
+     * Scans the claim area for the solid block closest to the center with no blocks above it
      * @return Safe spawn location, or null if no solid blocks found
      */
     private static Location findFirstSolidBlock(World world, int minX, int minY, int minZ,
                                                  int maxX, int maxY, int maxZ) {
+        // Calculate center coordinates
+        double centerX = (minX + maxX) / 2.0;
+        double centerZ = (minZ + maxZ) / 2.0;
+
+        Location bestLocation = null;
+        double closestDistance = Double.MAX_VALUE;
+
+        // Scan from top to bottom to find topmost solid blocks
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
-                for (int y = minY; y <= maxY; y++) {
+                // Find the highest solid block at this X,Z coordinate
+                for (int y = maxY; y >= minY; y--) {
                     Location loc = new Location(world, x, y, z);
                     Material blockType = world.getBlockAt(loc).getType();
 
                     if (blockType.isSolid()) {
-                        // Find a safe spawn location on top of this solid block
-                        return findSafeSpawnLocation(world, x, y, z, maxY);
+                        // Check if there are any solid blocks above this one
+                        boolean hasBlocksAbove = false;
+                        for (int checkY = y + 1; checkY <= maxY; checkY++) {
+                            Location aboveLoc = new Location(world, x, checkY, z);
+                            if (world.getBlockAt(aboveLoc).getType().isSolid()) {
+                                hasBlocksAbove = true;
+                                break;
+                            }
+                        }
+
+                        // Only consider blocks with no solid blocks above
+                        if (!hasBlocksAbove) {
+                            // Calculate distance to center (2D distance, ignoring Y)
+                            double distance = Math.sqrt(
+                                Math.pow(x - centerX, 2) + Math.pow(z - centerZ, 2)
+                            );
+
+                            if (distance < closestDistance) {
+                                closestDistance = distance;
+                                bestLocation = findSafeSpawnLocation(world, x, y, z, maxY);
+                            }
+                        }
+                        break; // Found the top solid block at this X,Z, move to next column
                     }
                 }
             }
         }
-        return null;
+
+        return bestLocation;
     }
 
     /**

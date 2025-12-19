@@ -243,8 +243,27 @@ public class Sector implements ConfigurationSerializable {
         sendInfoMessage(p, "Members: ", membersList.toString(), membersColor);
 
         if (this.hasClaim()) {
-            sendInfoMessage(p, "Claim start: ", String.valueOf(this.claim.start()), claimColor);
-            sendInfoMessage(p, "Claim end: ", String.valueOf(this.claim.end()), claimColor);
+            if (this.home != null) {
+                // Create clickable home location text
+                String homeCoords = String.format("(%d, %d, %d)",
+                    this.home.getBlockX(),
+                    this.home.getBlockY(),
+                    this.home.getBlockZ());
+
+                Component homeLocationText = Component.text(homeCoords)
+                    .color(claimColor)
+                    .clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/s home"))
+                    .hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(
+                        Component.text("Click to teleport home").color(TextColor.color(0x9E9E9E))
+                    ));
+
+                p.sendMessage(Component.text("│ ").color(headerColor)
+                    .append(Component.text("Home: ").color(infoColor))
+                    .append(homeLocationText));
+            } else {
+                sendInfoMessage(p, "Home: ", "No home set", TextColor.color(0x9E9E9E));
+            }
+
             if (this.claim.getBounds().contains(p.getLocation().toVector())) {
                 // Determine boundary color based on sector ownership
                 Sector playerSector = plugin.getData().getSector(p);
