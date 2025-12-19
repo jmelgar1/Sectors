@@ -65,6 +65,12 @@ public class ClaimCommand implements SubCommand {
 
             p.sendMessage(combinedMessage);
             ClaimToolInventoryUtilities.fillHotbarWithWand(p, plugin.getEvents().getSavedHotbars(), plugin);
+
+            // Create temporary platform and teleport player
+            java.util.List<Location> platformLocations = ClaimUtilities.createTemporaryPlatform(p);
+            plugin.getEvents().getTemporaryPlatforms().put(p.getUniqueId(), platformLocations);
+            p.sendMessage(Component.text("Temporary platform created!").color(TextColor.color(0x4CAF50)));
+
             return;
         }
 
@@ -114,16 +120,22 @@ public class ClaimCommand implements SubCommand {
         p.getInventory().remove(plugin.getWand());
         plugin.getData().getSelections().remove(p);
 
+        // Remove temporary platform
+        java.util.List<Location> tempPlatform = plugin.getEvents().getTemporaryPlatforms().remove(p.getUniqueId());
+        ClaimUtilities.removeTemporaryPlatform(tempPlatform);
+
         // Initialize claim and set home
         boolean hasSolidBlocks = ClaimUtilities.hasSolidBlocks(c);
         if (!hasSolidBlocks) {
-            p.sendMessage(Component.text("No solid blocks detected. Generating spawn platform...").color(TextColor.color(0x2196F3)));
+            p.sendMessage(Component.text("No solid blocks detected. Generating permanent platform...").color(TextColor.color(0x2196F3)));
         }
 
         Location homeLocation = ClaimUtilities.initializeClaimHome(c);
         if (homeLocation != null) {
             s.setHome(homeLocation);
             p.sendMessage(Component.text("Default home set!").color(TextColor.color(0x4CAF50)));
+            // Teleport player to the permanent platform
+            p.teleport(homeLocation);
         }
 
         p.sendMessage(ConfigManager.SUCCESS);

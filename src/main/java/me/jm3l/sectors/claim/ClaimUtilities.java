@@ -33,17 +33,7 @@ public class ClaimUtilities {
     }
 
     public static void showGlowingBounds(List<Location> edgeLocations, Player p, Sectors plugin, PlayerEntityService playerEntityService, Material material) {
-        showGlowingBounds(edgeLocations, p, plugin, playerEntityService, material, 5.0);
-    }
-
-    public static void showGlowingBounds(List<Location> edgeLocations, Player p, Sectors plugin, PlayerEntityService playerEntityService, Material material, double hideRadius) {
-        Location playerLoc = p.getLocation();
-
         for (Location loc : edgeLocations) {
-            // Skip if within hide radius (if enabled)
-            if (hideRadius > 0 && loc.distance(playerLoc) < hideRadius) {
-                continue;
-            }
 
             // Center the falling block entity in the block space for proper rendering
             double x = loc.getX() + 0.5;
@@ -197,6 +187,45 @@ public class ClaimUtilities {
                 Location platformLoc = new Location(world, x, y, z);
                 world.getBlockAt(platformLoc).setType(Material.GLASS);
             }
+        }
+    }
+
+    /**
+     * Creates a temporary 3x3 glass platform at the player's location
+     * @param player The player to create the platform for
+     * @return List of platform block locations for later removal
+     */
+    public static java.util.List<Location> createTemporaryPlatform(org.bukkit.entity.Player player) {
+        java.util.List<Location> platformLocations = new java.util.ArrayList<>();
+        Location playerLoc = player.getLocation();
+        World world = playerLoc.getWorld();
+        int centerX = playerLoc.getBlockX();
+        int centerZ = playerLoc.getBlockZ();
+        int y = playerLoc.getBlockY() - 1; // One block below player
+
+        for (int x = centerX - 1; x <= centerX + 1; x++) {
+            for (int z = centerZ - 1; z <= centerZ + 1; z++) {
+                Location platformLoc = new Location(world, x, y, z);
+                world.getBlockAt(platformLoc).setType(Material.GLASS);
+                platformLocations.add(platformLoc);
+            }
+        }
+
+        // Teleport player to center of platform
+        Location teleportLoc = new Location(world, centerX + 0.5, y + 1, centerZ + 0.5, playerLoc.getYaw(), playerLoc.getPitch());
+        player.teleport(teleportLoc);
+
+        return platformLocations;
+    }
+
+    /**
+     * Removes a temporary platform
+     * @param platformLocations List of locations to remove
+     */
+    public static void removeTemporaryPlatform(java.util.List<Location> platformLocations) {
+        if (platformLocations == null) return;
+        for (Location loc : platformLocations) {
+            loc.getWorld().getBlockAt(loc).setType(Material.AIR);
         }
     }
 

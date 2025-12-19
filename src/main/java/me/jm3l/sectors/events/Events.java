@@ -36,6 +36,8 @@ public class Events implements Listener {
     public Map<UUID, ItemStack[]> getSavedHotbars() {return this.savedHotbars;}
     private final Map<UUID, Integer> scrollCounts = new HashMap<>();
     private final Map<UUID, org.bukkit.scheduler.BukkitTask> boundaryRemovalTasks = new HashMap<>();
+    private final Map<UUID, java.util.List<Location>> temporaryPlatforms = new HashMap<>();
+    public Map<UUID, java.util.List<Location>> getTemporaryPlatforms() {return this.temporaryPlatforms;}
 
     private boolean isActionLegal(Player player, Location event){
         Sector playerSec = plugin.getData().getSector(player);
@@ -115,6 +117,10 @@ public class Events implements Listener {
         if (removalTask != null) {
             removalTask.cancel();
         }
+
+        // Remove temporary platform if player logs out in claim mode
+        java.util.List<Location> tempPlatform = temporaryPlatforms.remove(playerId);
+        ClaimUtilities.removeTemporaryPlatform(tempPlatform);
     }
 
     @EventHandler
@@ -141,6 +147,10 @@ public class Events implements Listener {
             e.getItemDrop().remove();
             ClaimToolPacketUtilities.clearAllPositionsAndMarkers(p, true, plugin);
             ClaimToolInventoryUtilities.restoreHotbar(p, savedHotbars, plugin);
+
+            // Remove temporary platform when leaving claim mode
+            java.util.List<Location> tempPlatform = temporaryPlatforms.remove(p.getUniqueId());
+            ClaimUtilities.removeTemporaryPlatform(tempPlatform);
         }
     }
 
@@ -183,7 +193,7 @@ public class Events implements Listener {
                     ? org.bukkit.Material.GREEN_STAINED_GLASS
                     : org.bukkit.Material.RED_STAINED_GLASS;
 
-                // Highlight claim boundaries (5-block radius filter applied in showGlowingBounds)
+                // Highlight claim boundaries
                 ClaimUtilities.showGlowingBounds(
                     newSector.getClaim().getEdgeLocations(),
                     p,
