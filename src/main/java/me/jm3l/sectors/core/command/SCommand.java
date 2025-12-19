@@ -48,9 +48,9 @@ public class SCommand implements CommandExecutor {
         subCommands.put("sethome", new SethomeCommand());
         subCommands.put("home", new HomeCommand());
         subCommands.put("radar", new RadarCommand());
+        subCommands.put("list", new ListCommand());
         //subCommandMap.put("kick", new KickCommand());
         //subCommandMap.put("who", info);
-        //subCommandMap.put("list", new ListCommand());
         //subCommandMap.put("notify", new NotifyCommand());
         //subCommandMap.put("version", new VersionCommand());
         //subCommandMap.put("setdtr", new SetDTRCommand());

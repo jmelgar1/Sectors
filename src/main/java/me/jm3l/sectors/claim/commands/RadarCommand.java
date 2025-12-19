@@ -104,13 +104,14 @@ public class RadarCommand implements SubCommand {
                     ? org.bukkit.Material.GREEN_STAINED_GLASS
                     : org.bukkit.Material.RED_STAINED_GLASS;
 
-                // Show boundaries
+                // Show boundaries (hideRadius = 0 to show all blocks, even near player)
                 ClaimUtilities.showGlowingBounds(
                     claim.getEdgeLocations(),
                     p,
                     plugin,
                     ServiceManager.getPlayerEntityService(),
-                    boundaryMaterial
+                    boundaryMaterial,
+                    0.0
                 );
 
                 alreadyShown.add(s);

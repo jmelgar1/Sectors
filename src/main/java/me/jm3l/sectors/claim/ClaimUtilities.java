@@ -33,12 +33,15 @@ public class ClaimUtilities {
     }
 
     public static void showGlowingBounds(List<Location> edgeLocations, Player p, Sectors plugin, PlayerEntityService playerEntityService, Material material) {
+        showGlowingBounds(edgeLocations, p, plugin, playerEntityService, material, 5.0);
+    }
+
+    public static void showGlowingBounds(List<Location> edgeLocations, Player p, Sectors plugin, PlayerEntityService playerEntityService, Material material, double hideRadius) {
         Location playerLoc = p.getLocation();
-        double hideRadius = 5.0;
 
         for (Location loc : edgeLocations) {
-            // Skip if within hide radius
-            if (loc.distance(playerLoc) < hideRadius) {
+            // Skip if within hide radius (if enabled)
+            if (hideRadius > 0 && loc.distance(playerLoc) < hideRadius) {
                 continue;
             }
 
