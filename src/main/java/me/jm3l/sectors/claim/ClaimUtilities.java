@@ -33,7 +33,15 @@ public class ClaimUtilities {
     }
 
     public static void showGlowingBounds(List<Location> edgeLocations, Player p, Sectors plugin, PlayerEntityService playerEntityService, Material material) {
+        Location playerLoc = p.getLocation();
+        double hideRadius = 5.0;
+
         for (Location loc : edgeLocations) {
+            // Skip if within hide radius
+            if (loc.distance(playerLoc) < hideRadius) {
+                continue;
+            }
+
             // Center the falling block entity in the block space for proper rendering
             double x = loc.getX() + 0.5;
             double y = loc.getY();

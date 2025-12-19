@@ -28,7 +28,9 @@ import java.util.UUID;
 
 public class Events implements Listener {
     private final Sectors plugin;
-    public Events(Sectors plugin) {this.plugin = plugin;}
+    public Events(Sectors plugin) {
+        this.plugin = plugin;
+    }
     private final Map<UUID, Sector> playerCurrentSector = new HashMap<>();
     private final Map<UUID, ItemStack[]> savedHotbars = new HashMap<>();
     public Map<UUID, ItemStack[]> getSavedHotbars() {return this.savedHotbars;}
@@ -105,6 +107,14 @@ public class Events implements Listener {
     @EventHandler
     private void onLeave(PlayerQuitEvent e) {
         plugin.getData().removeSPlayer(e.getPlayer());
+        UUID playerId = e.getPlayer().getUniqueId();
+        playerCurrentSector.remove(playerId);
+
+        // Cancel any pending removal tasks
+        org.bukkit.scheduler.BukkitTask removalTask = boundaryRemovalTasks.remove(playerId);
+        if (removalTask != null) {
+            removalTask.cancel();
+        }
     }
 
     @EventHandler
@@ -173,7 +183,7 @@ public class Events implements Listener {
                     ? org.bukkit.Material.GREEN_STAINED_GLASS
                     : org.bukkit.Material.RED_STAINED_GLASS;
 
-                // Highlight claim boundaries while inside
+                // Highlight claim boundaries (5-block radius filter applied in showGlowingBounds)
                 ClaimUtilities.showGlowingBounds(
                     newSector.getClaim().getEdgeLocations(),
                     p,
