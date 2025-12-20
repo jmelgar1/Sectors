@@ -101,6 +101,34 @@ public class Sector implements ConfigurationSerializable {
         return this.members;
     }
 
+    private ArrayList<UUID> officers = new ArrayList<>();
+
+    public ArrayList<UUID> getOfficers() {
+        return this.officers;
+    }
+
+    public boolean isOfficer(Player p) {
+        return this.officers.contains(p.getUniqueId());
+    }
+
+    public boolean isOfficer(UUID uuid) {
+        return this.officers.contains(uuid);
+    }
+
+    public boolean isOfficerOrLeader(Player p) {
+        return this.leader.equals(p.getUniqueId()) || this.officers.contains(p.getUniqueId());
+    }
+
+    public void addOfficer(UUID uuid) {
+        if (!this.officers.contains(uuid)) {
+            this.officers.add(uuid);
+        }
+    }
+
+    public void removeOfficer(UUID uuid) {
+        this.officers.remove(uuid);
+    }
+
     public Player[] getOnlineMembers() {
         ArrayList<Player> members = new ArrayList<>();
         if (Bukkit.getPlayer(this.leader) != null) members.add(Bukkit.getPlayer(this.leader));
@@ -114,6 +142,7 @@ public class Sector implements ConfigurationSerializable {
 
     public boolean hasMember(Player p) {
         if (this.members.contains(p.getUniqueId())) return true;
+        if (this.officers.contains(p.getUniqueId())) return true;
         return this.leader.equals(p.getUniqueId());
     }
 
@@ -166,6 +195,14 @@ public class Sector implements ConfigurationSerializable {
             if (Bukkit.getOfflinePlayer(UUID.fromString(m)).isOnline())
                 data.getData().addSPlayer(Bukkit.getPlayer(UUID.fromString(m)), this);
         }
+        // Load officers (with backwards compatibility)
+        if (map.get("officers") != null) {
+            for (String o : (ArrayList<String>) map.get("officers")) {
+                this.officers.add(UUID.fromString(o));
+                if (Bukkit.getOfflinePlayer(UUID.fromString(o)).isOnline())
+                    data.getData().addSPlayer(Bukkit.getPlayer(UUID.fromString(o)), this);
+            }
+        }
         this.description = (String) map.get("description");
         this.dtr = (int) map.get("dtr");
         if (map.get("kills") == null) this.kills = 0; else this.kills = (int) map.get("kills");
@@ -186,6 +223,12 @@ public class Sector implements ConfigurationSerializable {
                 if(p != null){p.sendMessage(text);}
             }
         }
+        for (UUID pUUID : this.officers) {
+            if (Bukkit.getOfflinePlayer(pUUID).isOnline()) {
+                Player p = Bukkit.getPlayer(pUUID);
+                if(p != null){p.sendMessage(text);}
+            }
+        }
         if (Bukkit.getOfflinePlayer(this.leader).isOnline()) {
             Player p = Bukkit.getPlayer(this.leader);
             if (p != null && p.isOnline()) {
@@ -197,6 +240,10 @@ public class Sector implements ConfigurationSerializable {
     //Set new sector leader & add old one to members.
     public void setLeader(final UUID id) {
         this.members.add(this.leader);
+        // Remove new leader from officers if they were one
+        this.officers.remove(id);
+        // Remove new leader from members if they were one
+        this.members.remove(id);
         this.leader = id;
         Sector pSector = plugin.getData().getSector(Bukkit.getPlayer(this.leader));
         String sectorName = pSector.getName();
@@ -230,6 +277,24 @@ public class Sector implements ConfigurationSerializable {
             sendInfoMessage(p, "Leader: ", leaderName, leaderColor);
         }
 
+        // Display officers
+        if (!this.officers.isEmpty()) {
+            StringBuilder officersList = new StringBuilder();
+            for (UUID id : this.officers) {
+                String playerName = getOnlinePlayerName(id);
+                if(playerName != null) {
+                    if(officersList.length() > 0){
+                        officersList.append(", ");
+                    }
+                    officersList.append(playerName);
+                }
+            }
+            if (officersList.length() > 0) {
+                sendInfoMessage(p, "Officers: ", officersList.toString(), TextColor.color(0x9C27B0));
+            }
+        }
+
+        // Display members
         StringBuilder membersList = new StringBuilder();
         for (UUID id : this.members) {
             String playerName = getOnlinePlayerName(id);
@@ -240,7 +305,9 @@ public class Sector implements ConfigurationSerializable {
                 membersList.append(playerName);
             }
         }
-        sendInfoMessage(p, "Members: ", membersList.toString(), membersColor);
+        if (membersList.length() > 0) {
+            sendInfoMessage(p, "Members: ", membersList.toString(), membersColor);
+        }
 
         if (this.hasClaim()) {
             if (this.home != null) {
@@ -307,6 +374,9 @@ public class Sector implements ConfigurationSerializable {
         for (UUID id : this.getMembers()) {
             plugin.getData().removeSPlayer(Bukkit.getPlayer(id));
         }
+        for (UUID id : this.getOfficers()) {
+            plugin.getData().removeSPlayer(Bukkit.getPlayer(id));
+        }
         plugin.getData().removeSector(this);
         Bukkit.broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(ConfigManager.SECTOR_DISSOLVED.replace("{sector}", this.name)));
     }
@@ -318,7 +388,10 @@ public class Sector implements ConfigurationSerializable {
             this.disband();
             return true;
         }
-        if (this.members.remove(p)) {
+        boolean wasOfficer = this.officers.remove(p);
+        boolean wasMember = this.members.remove(p);
+
+        if (wasOfficer || wasMember) {
             plugin.getData().removeSPlayer(Bukkit.getPlayer(p));
             String pName = Bukkit.getOfflinePlayer(p).getName();
             if(wasKicked){
@@ -347,10 +420,15 @@ public class Sector implements ConfigurationSerializable {
         for (UUID i : this.members) {
             membersStr.add(i.toString());
         }
+        ArrayList<String> officersStr = new ArrayList<>();
+        for (UUID i : this.officers) {
+            officersStr.add(i.toString());
+        }
         map.put("name", this.name);
         map.put("color", this.color.asHexString());
         map.put("leader", this.leader.toString());
         map.put("members", membersStr);
+        map.put("officers", officersStr);
         map.put("description", this.description);
         map.put("dtr", this.dtr);
         map.put("home", this.home);

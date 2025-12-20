@@ -6,7 +6,11 @@ import me.jm3l.sectors.core.command.SCommand;
 import me.jm3l.sectors.core.command.SaveSectorsCommand;
 import me.jm3l.sectors.claim.wand.ClaimWand;
 import me.jm3l.sectors.claim.wand.ClaimToolEvents;
-import me.jm3l.sectors.events.Events;
+import me.jm3l.sectors.claim.events.ClaimProtectionEvents;
+import me.jm3l.sectors.claim.events.ClaimToolInteractionEvents;
+import me.jm3l.sectors.events.EventDataManager;
+import me.jm3l.sectors.events.PlayerSessionEvents;
+import me.jm3l.sectors.sector.events.SectorBoundaryEvents;
 import me.jm3l.sectors.sector.Sector;
 import me.jm3l.sectors.claim.Claim;
 import me.jm3l.sectors.claim.visual.ClaimParticleTask;
@@ -36,9 +40,9 @@ public final class Sectors extends JavaPlugin {
         return sectorsFile;
     }
 
-    private Events events;
-    public Events getEvents(){
-        return this.events;
+    private EventDataManager eventDataManager;
+    public EventDataManager getEventDataManager(){
+        return this.eventDataManager;
     }
 
     private ClaimToolEvents claimToolEvents;
@@ -61,23 +65,38 @@ public final class Sectors extends JavaPlugin {
     @Override
     public void onEnable() {
         PacketEvents.getAPI().init();
+
+        // Initialize data managers and core systems
+        this.eventDataManager = new EventDataManager();
         this.claimToolEvents = new ClaimToolEvents(this);
         this.claimParticleTask = new ClaimParticleTask(this);
-        this.events = new Events(this);
         this.claimWand = new ClaimWand(this);
         this.playerData = new PlayerData();
+
+        // Register commands
         getCommand("sectors").setExecutor(new SCommand(this));
         getCommand("savesectors").setExecutor(new SaveSectorsCommand(this));
+
+        // Load configuration
         saveDefaultConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
         ConfigManager.loadConfig(this.getConfig());
+
+        // Load sector data
         sectorsFile = new SectorFile(this);
         sectorsFile.loadSectors();
         ConfigurationSerialization.registerClass(Sector.class);
         ConfigurationSerialization.registerClass(Claim.class);
-        getServer().getPluginManager().registerEvents(events, this);
+
+        // Register all event listeners
+        getServer().getPluginManager().registerEvents(new ClaimProtectionEvents(this), this);
+        getServer().getPluginManager().registerEvents(new ClaimToolInteractionEvents(this, eventDataManager), this);
+        getServer().getPluginManager().registerEvents(new PlayerSessionEvents(this, eventDataManager), this);
+        getServer().getPluginManager().registerEvents(new SectorBoundaryEvents(this, eventDataManager), this);
         getServer().getPluginManager().registerEvents(claimToolEvents, this);
+
+        // Start tasks
         claimParticleTask.runTaskTimer(this, 0L, 1L);
     }
 

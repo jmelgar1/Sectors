@@ -26,8 +26,8 @@ public class InviteCommand implements SubCommand {
     @Override
     public void perform(Player p, String[] args, Sectors plugin) throws NotInSector {
         Sector s = plugin.getData().getSectorOrError(p);
-        if (!s.getLeader().equals(p.getUniqueId())) {
-            p.sendMessage(ConfigManager.MUST_BE_LEADER);
+        if (!s.isOfficerOrLeader(p)) {
+            p.sendMessage(Component.text("You must be an officer or leader to invite players.").color(TextColor.color(0xE57373)));
             return;
         }
         if (args.length == 0) {

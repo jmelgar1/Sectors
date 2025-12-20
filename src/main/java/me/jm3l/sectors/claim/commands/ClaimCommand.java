@@ -64,11 +64,11 @@ public class ClaimCommand implements SubCommand {
                 .append(outline);
 
             p.sendMessage(combinedMessage);
-            ClaimToolInventoryUtilities.fillHotbarWithWand(p, plugin.getEvents().getSavedHotbars(), plugin);
+            ClaimToolInventoryUtilities.fillHotbarWithWand(p, plugin.getEventDataManager().getSavedHotbars(), plugin);
 
             // Create temporary platform and teleport player
             java.util.List<Location> platformLocations = ClaimUtilities.createTemporaryPlatform(p);
-            plugin.getEvents().getTemporaryPlatforms().put(p.getUniqueId(), platformLocations);
+            plugin.getEventDataManager().getTemporaryPlatforms().put(p.getUniqueId(), platformLocations);
             p.sendMessage(Component.text("Temporary platform created!").color(TextColor.color(0x4CAF50)));
 
             return;
@@ -121,7 +121,7 @@ public class ClaimCommand implements SubCommand {
         plugin.getData().getSelections().remove(p);
 
         // Remove temporary platform
-        java.util.List<Location> tempPlatform = plugin.getEvents().getTemporaryPlatforms().remove(p.getUniqueId());
+        java.util.List<Location> tempPlatform = plugin.getEventDataManager().getTemporaryPlatforms().remove(p.getUniqueId());
         ClaimUtilities.removeTemporaryPlatform(tempPlatform);
 
         // Initialize claim and set home
